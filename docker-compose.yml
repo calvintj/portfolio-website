@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
+    volumes:
+      # Persist admin content and uploads
+      - content_data:/app/data
+      - content_uploads:/app/public/uploads
+    restart: unless-stopped
+
+volumes:
+  content_data:
+  content_uploads:

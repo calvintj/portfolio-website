@@ -1,0 +1,20 @@
+# Dependencies and build output
+node_modules
+.next
+out
+build
+
+# Git and env
+.git
+.gitignore
+.env
+.env.*
+
+# IDE and misc
+.DS_Store
+*.md
+!README.md
+
+# Optional: omit local data so container starts with defaults (remove if you want to seed)
+# data
+# public/uploads
