@@ -2,49 +2,75 @@
   "profileImage": "/uploads/profilePic-1772007761411.jpg",
   "name": "Calvin Hendra",
   "nickname": "Calvin",
-  "position": "Software Engineer",
-  "heroContent": "Final-year Computer Science student and Software Engineer Intern with hands-on experience delivering end-to-end applications in a fintech and AI-driven environment. Experienced in backend systems, API development, database design, AI-powered integration, and frontend development for building complete, production-ready applications. Comfortable working on complex problem-solving tasks, debugging system-level issues, and collaborating in team-based development to deliver reliable solutions.",
+  "position": "Software Engineer & AI Engineer",
+  "heroContent": "Full-stack software and AI engineer with 1.5 years of end-to-end production experience in AI-powered SaaS. Comfortable owning every layer of the stack: LLM/RAG pipelines, backend APIs, frontend interfaces, ETL, and cloud deployment. Thrives in fast-moving startup environments and consistently delivers production-ready work with measurable business impact.",
   "experiences": [
     {
-      "year": "February 2026 - Present",
+      "year": "January 2026 - Present",
       "role": "Software Engineer",
       "company": "PT Bati Investasi Teknologi",
-      "description": "\nLed the development and maintenance of a widget-based AI sales agent embedded into client websites to support user acquisition and conversion.\n\nOwned full-stack feature development, including LLM-based workflows using Retrieval-Augmented Generation (RAG), along with system observability through tracing and monitoring.\n\nCollaborated closely with product and business teams to align AI behavior with financial domain constraints and sales objectives.\n    ",
+      "description": "Shipped Bati Agent — a script-injected AI sales widget — to 5 live Shopify storefronts (Cotton Ink, Torch, KamiIdea, Hijab Chic Store, Russ Simple Life), achieving 30–40% conversion rate uplift for the first client across ~10,000 daily sessions.\n\nBuilt the full AI search pipeline: intent classification, NLP query parsing (Bahasa Indonesia), hybrid text-to-SQL + Qdrant vector search, and streaming SSE responses using LangChain on a multi-tenant architecture.\n\nDeveloped admin dashboard and Embed SDK in Next.js 15; backend in FastAPI with PostgreSQL, Redis, and ClickHouse; ETL service (Node.js) via Shopify GraphQL Bulk Operations.\n\nDeployed all services on AWS EC2 via Docker Compose and Caddy SSL; managed GitHub Actions CI/CD and Cloudflare DNS across all services.\n\nDeveloped BatiLabs Web (React + Vite): company landing page and client onboarding portal with Shopify integration, script installation flow, and Xendit payment, deployed on AWS S3 + Cloudflare.",
       "technologies": [
-        "TypeScript",
-        "Next.js",
-        "React",
-        "Tailwind CSS",
         "Python",
         "FastAPI",
+        "TypeScript",
+        "Next.js 15",
+        "React",
+        "Vite",
+        "Tailwind CSS",
         "LangChain",
         "RAG",
+        "Qdrant",
         "PostgreSQL",
-        "Vector Databases"
+        "ClickHouse",
+        "Redis",
+        "Node.js",
+        "Docker",
+        "AWS",
+        "GitHub Actions",
+        "Shopify API",
+        "Xendit"
       ]
     },
     {
-      "year": "February 2025 - February 2026",
+      "year": "February 2025 - January 2026",
       "role": "Software Engineer Intern",
       "company": "PT Bati Investasi Teknologi",
-      "description": "\n  Contributed to the development of Bati's AI Wealth Management platform and the early-stage AI sales agent as part of the engineering team.\n  Worked on full-stack web features, backend APIs, and initial RAG pipelines supporting both internal wealth tools and client-facing experiences.\n  Collaborated with the trading team to support data workflows and internal tools used for financial analysis and modeling.\n    ",
+      "description": "Financing Sales Agent Chatbot: Built a conversational AI chatbot for financial products (vehicle installment plans, loan calculations, foreign currency) using FastAPI, LangChain, RAG with Qdrant, and tool-calling for real-time financial calculations. Implemented streaming responses, Supabase data ingestion, and containerised deployment with Docker Compose; built conversation UI in Next.js.\n\nWeb-Based CRM for Relationship Managers: Developed a web-based CRM for Relationship Managers using Next.js and Node.js with JWT auth, RBAC, and PostgreSQL; built data-driven dashboards and reporting features.",
       "technologies": [
-        "TypeScript",
-        "React",
-        "Next.js",
-        "Tailwind CSS",
         "Python",
         "FastAPI",
-        "PostgreSQL"
+        "TypeScript",
+        "Next.js",
+        "React",
+        "Tailwind CSS",
+        "LangChain",
+        "RAG",
+        "Qdrant",
+        "PostgreSQL",
+        "Node.js",
+        "Docker",
+        "Supabase"
       ]
     }
   ],
   "certifications": [
     {
+      "year": "May 2026",
+      "role": "Financial Markets",
+      "company": "Yale University — Coursera",
+      "description": "Completed Yale University's Financial Markets course on Coursera, covering financial markets, risk management, behavioural finance, and investment principles.",
+      "technologies": [
+        "Financial Markets",
+        "Risk Management",
+        "Investment"
+      ]
+    },
+    {
       "year": "May 2024",
-      "role": "Certified Backend Developer with Node.js",
+      "role": "Mastering Backend Development with Node.js",
       "company": "BINUS Center",
-      "description": "Earned certification in backend development by completing an intensive program focused on Mastering Backend Development with Node.js. Demonstrated expertise in server-side development, RESTful API design, database integration using Sequelize ORM, and middleware implementation through a rigorous assessment process.",
+      "description": "Certified in backend development with Node.js, covering RESTful API design, database integration using Sequelize ORM, authentication, and middleware implementation.",
       "technologies": [
         "Node.js",
         "Express.js",
@@ -52,6 +78,13 @@
         "MySQL",
         "REST API"
       ]
+    },
+    {
+      "year": "February 2023",
+      "role": "ITversity Certification",
+      "company": "Course-Net",
+      "description": "Completed ITversity certification program covering core IT and software development fundamentals.",
+      "technologies": []
     }
   ],
   "organizations": [
@@ -94,18 +127,55 @@
   "projects": [
     {
       "title": {
+        "text": "Bati Agent — AI Sales Widget"
+      },
+      "image": "/project-bati.png",
+      "description": "Script-injected AI sales widget deployed to 5 live Shopify storefronts (Cotton Ink, Torch, KamiIdea, Hijab Chic Store, Russ Simple Life). Features NLP semantic search in Bahasa Indonesia, personalised product recommendations, and a multi-tenant admin dashboard. Achieved 30–40% conversion rate uplift for the first client across ~10,000 daily sessions.",
+      "technologies": [
+        "Python",
+        "FastAPI",
+        "Next.js 15",
+        "LangChain",
+        "Qdrant",
+        "PostgreSQL",
+        "ClickHouse",
+        "Redis",
+        "Docker",
+        "AWS EC2",
+        "Shopify API"
+      ]
+    },
+    {
+      "title": {
+        "text": "BatiLabs Web"
+      },
+      "image": "/project-bati.png",
+      "description": "Company landing page and client onboarding portal for PT Bati Investasi Teknologi. Includes a full multi-step onboarding flow: Shopify store integration, script installation, and Xendit payment. Deployed on AWS S3 + Cloudflare.",
+      "technologies": [
+        "TypeScript",
+        "React",
+        "Vite",
+        "Tailwind CSS",
+        "FastAPI",
+        "PostgreSQL",
+        "AWS S3",
+        "Cloudflare",
+        "Xendit"
+      ]
+    },
+    {
+      "title": {
         "text": "Bati WealthAI"
       },
       "image": "/project-bati.png",
-      "description": "Responsible for the development of Bati WealthAI, an intelligent web based CRM for relationship manager to grow their portfolio with Bati AI integration.",
+      "description": "Web-based CRM for Relationship Managers to manage client portfolios and sales workflows. Built with Next.js frontend and Node.js backend with JWT authentication, RBAC, and data-driven dashboards.",
       "technologies": [
         "TypeScript",
-        "React.js",
         "Next.js",
-        "TailwindCSS",
         "Node.js",
-        "Express.js",
-        "PostgreSQL"
+        "PostgreSQL",
+        "JWT",
+        "REST API"
       ]
     },
     {
@@ -128,11 +198,9 @@
       "image": "/project-2.jpg",
       "description": "Led the development of MakanGak, a website on food options around Binus University, to assist new students in finding meals.",
       "technologies": [
-        "HTML",
-        "CSS",
         "JavaScript",
-        "ReactJs",
-        "NodeJs",
+        "React",
+        "Node.js",
         "MySQL"
       ]
     }

@@ -48,6 +48,19 @@ const Hero = () => {
             >
               {content.heroContent}
             </motion.p>
+            <motion.a
+              variants={container(1.5)}
+              initial="hidden"
+              animate="visible"
+              href="/Calvin_Hendra_CV.pdf"
+              download="Calvin_Hendra_CV.pdf"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-600 px-6 py-2 text-sm font-medium text-neutral-300 transition-all hover:border-neutral-400 hover:text-white hover:bg-neutral-800"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              Download CV
+            </motion.a>
           </div>
         </div>
         <div className="w-full lg:w-1/3 lg:p-8">
