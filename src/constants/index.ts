@@ -96,6 +96,7 @@ export type ProjectTitle = { text: string; link?: string };
 export const PROJECTS: {
   title: ProjectTitle;
   image: string;
+  imageFit?: "cover" | "contain";
   description: string;
   technologies: string[];
 }[] = [
@@ -105,6 +106,7 @@ export const PROJECTS: {
       // link: "https://wealthplatform.batiinvestasi.ai",
     },
     image: "/project-bati.png",
+    imageFit: "contain",
     description:
       "Responsible for the development of Bati WealthAI, an intelligent web based CRM for relationship manager to grow their portfolio with Bati AI integration.",
     technologies: [
@@ -123,6 +125,7 @@ export const PROJECTS: {
       // link: "https://mulaidulu.site",
     },
     image: "/project-1.png",
+    imageFit: "contain",
     description:
       "Led the development of MulaiDulu, a coaching platform aimed at empowering MSMEs and individuals to grow their businesses.",
     technologies: ["HTML", "Bootstrap", "Laravel", "MySQL"],

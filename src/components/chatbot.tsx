@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useContent } from "@/hooks";
 
 type Message = { role: "user" | "bot"; content: string };
@@ -11,13 +11,15 @@ const ERROR_MESSAGE = "Something went wrong. Please try again.";
 function formatMessage(text: string) {
   const lines = text.split("\n");
   return lines.map((line, i) => {
-    const parts = line.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
-      part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={`${i}-${j}`}>{part.slice(2, -2)}</strong>
-      ) : (
-        part
-      )
-    );
+    const parts = line
+      .split(/(\*\*[^*]+\*\*)/g)
+      .map((part, j) =>
+        part.startsWith("**") && part.endsWith("**") ? (
+          <strong key={`${i}-${j}`}>{part.slice(2, -2)}</strong>
+        ) : (
+          part
+        ),
+      );
     return (
       <span key={i}>
         {parts}
@@ -55,7 +57,10 @@ export default function Chatbot() {
   }, [content.nickname]);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, loading, streamingContent]);
 
   const send = async () => {
@@ -135,7 +140,7 @@ export default function Chatbot() {
       <motion.button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-pink-400/90 via-slate-400/90 to-purple-500/90 text-neutral-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-[#00091d]"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-teal-300 text-zinc-900 shadow-lg shadow-teal-500/20 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-[#0a0a0c]"
         aria-label={isOpen ? "Close chat" : "Open chat"}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -154,7 +159,12 @@ export default function Chatbot() {
               exit={{ opacity: 0, rotate: 90 }}
               transition={{ duration: 0.15 }}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </motion.svg>
           ) : (
             <motion.svg
@@ -183,81 +193,80 @@ export default function Chatbot() {
         {isOpen && (
           <motion.div
             key="chat-window"
-            className="fixed bottom-24 right-6 z-40 flex h-[min(28rem,80vh)] w-[min(22rem,95vw)] flex-col overflow-hidden rounded-2xl border border-neutral-900 bg-[#00091d] shadow-xl shadow-black/30"
+            className="fixed bottom-24 right-6 z-40 flex h-[min(28rem,80vh)] w-[min(22rem,95vw)] flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-[#0a0a0c] shadow-xl shadow-black/40"
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
           >
-          <div className="flex items-center gap-2 border-b border-neutral-900 bg-neutral-900/60 px-4 py-3">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="font-semibold text-neutral-300">{content.nickname}'s assistant</span>
-          </div>
-          <div
-            ref={listRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#00091d]"
-          >
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+            <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900/60 px-4 py-3">
+              <div className="h-2 w-2 rounded-full bg-teal-400" />
+              <span className="text-sm font-medium text-zinc-200">
+                {content.nickname}'s assistant
+              </span>
+            </div>
+            <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((m, i) => (
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
-                    m.role === "user"
-                      ? "bg-neutral-900 text-neutral-200 ring-1 ring-neutral-700"
-                      : "bg-neutral-800/80 text-neutral-300"
-                  }`}
+                  key={i}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className="whitespace-pre-wrap">
-                    {m.role === "bot" ? formatMessage(m.content) : m.content}
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
+                      m.role === "user"
+                        ? "bg-teal-300/10 text-zinc-200 ring-1 ring-teal-300/20"
+                        : "bg-zinc-800/80 text-zinc-300"
+                    }`}
+                  >
+                    <div className="whitespace-pre-wrap">
+                      {m.role === "bot" ? formatMessage(m.content) : m.content}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {streamingContent && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl bg-neutral-800/80 px-4 py-2 text-sm text-neutral-300">
-                  <div className="whitespace-pre-wrap">
-                    {formatMessage(streamingContent)}
-                    <span className="inline-block w-2 h-4 ml-0.5 bg-purple-500 animate-pulse align-middle" />
+              ))}
+              {streamingContent && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] rounded-2xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300">
+                    <div className="whitespace-pre-wrap">
+                      {formatMessage(streamingContent)}
+                      <span className="inline-block w-2 h-4 ml-0.5 bg-teal-400 animate-pulse align-middle" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {loading && !streamingContent && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl bg-neutral-800/80 px-4 py-2 text-sm text-neutral-400 animate-pulse">
-                  Thinking...
+              )}
+              {loading && !streamingContent && (
+                <div className="flex justify-start">
+                  <div className="rounded-2xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-400 animate-pulse">
+                    Thinking...
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="border-t border-neutral-900 bg-neutral-900/40 p-3">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                send();
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything..."
-                disabled={loading}
-                className="flex-1 rounded-xl border border-neutral-700 bg-neutral-800/80 px-4 py-2.5 text-sm text-neutral-300 placeholder-neutral-500 outline-none focus:border-purple-600/50 focus:ring-1 focus:ring-purple-600/50 disabled:opacity-60"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-xl bg-purple-700 px-4 py-2.5 text-sm font-medium text-neutral-100 transition hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-60"
+              )}
+            </div>
+            <div className="border-t border-zinc-800 bg-zinc-900/40 p-3">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  send();
+                }}
+                className="flex gap-2"
               >
-                Send
-              </button>
-            </form>
-          </div>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything..."
+                  disabled={loading}
+                  className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 text-sm text-zinc-300 placeholder-zinc-500 outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:opacity-60"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,30 +1,34 @@
-import Navbar from "@/components/navbar";
-import Hero from "@/components/hero";
-import Technologies from "@/components/technologies";
-import Experience from "@/components/experience";
 import Certification from "@/components/certification";
+import Chatbot from "@/components/chatbot";
+import Contact from "@/components/contact";
+import Experience from "@/components/experience";
+import Hero from "@/components/hero";
+import Navbar from "@/components/navbar";
 import Organization from "@/components/organization";
 import Projects from "@/components/projects";
-import Contact from "@/components/contact";
-import Chatbot from "@/components/chatbot";
+import Technologies from "@/components/technologies";
 
 export const App = () => {
   return (
-    <div className="overflow-x-hidden text-neutral-300 antialiased selection:bg-cyan-300 selection:text-cyan-900">
-      <div className="fixed top-0 -z-10 h-full w-full">
-        <div className="absolute top-0 z-[-2] h-screen w-screen bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00091d_1px)] bg-[size:20px_20px]"></div>{" "}
+    <div className="relative min-h-screen overflow-x-hidden antialiased">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[#0a0a0c]" />
+        <div className="absolute left-1/2 top-0 h-[32rem] w-[56rem] -translate-x-1/2 rounded-full bg-teal-500/[0.07] blur-[120px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_40%,transparent_100%)]" />
       </div>
-      <div className="container mx-auto px-12 lg:px-0">
-        <Navbar />
+
+      <Navbar />
+      <main className="mx-auto max-w-4xl px-6 lg:px-8">
         <Hero />
         <Technologies />
         <Experience />
+        <Projects />
         <Certification />
         <Organization />
-        <Projects />
         <Contact />
-        <Chatbot />
-      </div>
+      </main>
+      <Chatbot />
     </div>
   );
 };

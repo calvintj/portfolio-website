@@ -143,7 +143,8 @@
         "Docker",
         "AWS EC2",
         "Shopify API"
-      ]
+      ],
+      "imageFit": "contain"
     },
     {
       "title": {
@@ -161,7 +162,8 @@
         "AWS S3",
         "Cloudflare",
         "Xendit"
-      ]
+      ],
+      "imageFit": "contain"
     },
     {
       "title": {
@@ -176,7 +178,8 @@
         "PostgreSQL",
         "JWT",
         "REST API"
-      ]
+      ],
+      "imageFit": "contain"
     },
     {
       "title": {
@@ -189,7 +192,8 @@
         "Bootstrap",
         "Laravel",
         "MySQL"
-      ]
+      ],
+      "imageFit": "contain"
     },
     {
       "title": {

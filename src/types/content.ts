@@ -25,6 +25,8 @@ export type Organization = {
 export type Project = {
   title: { text: string; link?: string };
   image: string;
+  /** "contain" for logos/graphics with whitespace, "cover" (default) for photos/screenshots */
+  imageFit?: "cover" | "contain";
   description: string;
   technologies: string[];
 };

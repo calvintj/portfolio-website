@@ -1,48 +1,557 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { Content, Experience, Certification, Organization, Project } from "@/types/content";
+import {
+  type InputHTMLAttributes,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+  useEffect,
+  useState,
+} from "react";
+import {
+  FiChevronDown,
+  FiChevronUp,
+  FiPlus,
+  FiTrash2,
+  FiUpload,
+  FiX,
+} from "react-icons/fi";
+import type { Content, Project } from "@/types/content";
+
+/* ---------- form primitives ---------- */
+
+const inputClass =
+  "w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none transition-colors focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50";
+
+function Label({ children }: { children: ReactNode }) {
+  return (
+    <span className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-500">
+      {children}
+    </span>
+  );
+}
+
+function Field({
+  label,
+  ...props
+}: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      <Label>{label}</Label>
+      <input className={inputClass} {...props} />
+    </label>
+  );
+}
+
+function Area({
+  label,
+  ...props
+}: { label: string } & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <label className="block">
+      <Label>{label}</Label>
+      <textarea className={`${inputClass} resize-y`} {...props} />
+    </label>
+  );
+}
+
+function TagInput({
+  label,
+  tags,
+  onChange,
+}: {
+  label: string;
+  tags: string[];
+  onChange: (tags: string[]) => void;
+}) {
+  const [draft, setDraft] = useState("");
+
+  const commit = () => {
+    const parts = draft
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t && !tags.includes(t));
+    if (parts.length) onChange([...tags, ...parts]);
+    setDraft("");
+  };
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2 py-1.5 transition-colors focus-within:border-teal-400/50 focus-within:ring-1 focus-within:ring-teal-400/50">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 font-mono text-xs text-zinc-300"
+          >
+            {tag}
+            <button
+              type="button"
+              aria-label={`Remove ${tag}`}
+              onClick={() => onChange(tags.filter((t) => t !== tag))}
+              className="text-zinc-500 hover:text-red-400"
+            >
+              <FiX className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              commit();
+            } else if (e.key === "Backspace" && !draft && tags.length) {
+              onChange(tags.slice(0, -1));
+            }
+          }}
+          placeholder={tags.length ? "" : "Type and press Enter…"}
+          className="min-w-28 flex-1 bg-transparent px-1 py-0.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ImagePicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const pick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setUploading(true);
+      setError(null);
+      try {
+        const formData = new FormData();
+        formData.set("file", file);
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!data.url) throw new Error(data.error || "Upload failed");
+        onChange(data.url);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Upload failed");
+      } finally {
+        setUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex items-start gap-3">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+          {value ? (
+            <img src={value} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="font-mono text-[10px] text-zinc-600">none</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <button
+            type="button"
+            onClick={pick}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-teal-400/50 hover:text-teal-300 disabled:opacity-50"
+          >
+            <FiUpload className="h-3.5 w-3.5" />
+            {uploading ? "Uploading…" : "Upload image"}
+          </button>
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="or paste an image URL"
+            className={inputClass}
+          />
+          {error && <p className="text-xs text-red-400">{error}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- collapsible entry card ---------- */
+
+function EntryCard({
+  title,
+  subtitle,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+  defaultOpen,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  onRemove: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen ?? false);
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30">
+      <div className="flex items-center gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          {open ? (
+            <FiChevronUp className="h-4 w-4 shrink-0 text-zinc-500" />
+          ) : (
+            <FiChevronDown className="h-4 w-4 shrink-0 text-zinc-500" />
+          )}
+          <span className="truncate text-sm font-medium text-zinc-200">
+            {title || "Untitled"}
+          </span>
+          {subtitle && (
+            <span className="hidden truncate font-mono text-xs text-zinc-500 sm:block">
+              {subtitle}
+            </span>
+          )}
+        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          {onMoveUp && (
+            <button
+              type="button"
+              onClick={onMoveUp}
+              aria-label="Move up"
+              className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
+            >
+              <FiChevronUp className="h-4 w-4" />
+            </button>
+          )}
+          {onMoveDown && (
+            <button
+              type="button"
+              onClick={onMoveDown}
+              aria-label="Move down"
+              className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
+            >
+              <FiChevronDown className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label="Remove"
+            className="rounded p-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+          >
+            <FiTrash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {open && (
+        <div className="space-y-4 border-t border-zinc-800/60 p-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-400 transition-colors hover:border-teal-400/50 hover:text-teal-300"
+    >
+      <FiPlus className="h-4 w-4" />
+      {label}
+    </button>
+  );
+}
+
+/* ---------- generic timeline editor (experience / certs / orgs) ---------- */
+
+type TimelineItem = {
+  year: string;
+  role: string;
+  company: string;
+  description: string;
+  technologies: string[];
+};
+
+function moveItem<T>(list: T[], from: number, to: number): T[] {
+  if (to < 0 || to >= list.length) return list;
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+}
+
+function TimelineEditor({
+  items,
+  onChange,
+  addLabel,
+  companyLabel,
+  roleLabel,
+}: {
+  items: TimelineItem[];
+  onChange: (items: TimelineItem[]) => void;
+  addLabel: string;
+  companyLabel: string;
+  roleLabel: string;
+}) {
+  const patch = (i: number, p: Partial<TimelineItem>) => {
+    const next = [...items];
+    next[i] = { ...next[i], ...p };
+    onChange(next);
+  };
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <EntryCard
+          // biome-ignore lint/suspicious/noArrayIndexKey: entries have no stable id and are reorderable by index
+          key={i}
+          title={item.role}
+          subtitle={item.company}
+          defaultOpen={!item.role && !item.company}
+          onRemove={() => onChange(items.filter((_, j) => j !== i))}
+          onMoveUp={
+            i > 0 ? () => onChange(moveItem(items, i, i - 1)) : undefined
+          }
+          onMoveDown={
+            i < items.length - 1
+              ? () => onChange(moveItem(items, i, i + 1))
+              : undefined
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Period"
+              value={item.year}
+              placeholder="Jan 2026 – Present"
+              onChange={(e) => patch(i, { year: e.target.value })}
+            />
+            <Field
+              label={roleLabel}
+              value={item.role}
+              onChange={(e) => patch(i, { role: e.target.value })}
+            />
+          </div>
+          <Field
+            label={companyLabel}
+            value={item.company}
+            onChange={(e) => patch(i, { company: e.target.value })}
+          />
+          <Area
+            label="Description"
+            value={item.description}
+            rows={4}
+            onChange={(e) => patch(i, { description: e.target.value })}
+          />
+          <TagInput
+            label="Technologies / tags"
+            tags={item.technologies}
+            onChange={(tags) => patch(i, { technologies: tags })}
+          />
+        </EntryCard>
+      ))}
+      <AddButton
+        label={addLabel}
+        onClick={() =>
+          onChange([
+            ...items,
+            {
+              year: "",
+              role: "",
+              company: "",
+              description: "",
+              technologies: [],
+            },
+          ])
+        }
+      />
+    </div>
+  );
+}
+
+/* ---------- projects editor ---------- */
+
+function ProjectsEditor({
+  projects,
+  onChange,
+}: {
+  projects: Project[];
+  onChange: (projects: Project[]) => void;
+}) {
+  const patch = (i: number, p: Partial<Project>) => {
+    const next = [...projects];
+    next[i] = { ...next[i], ...p };
+    onChange(next);
+  };
+  return (
+    <div className="space-y-3">
+      {projects.map((project, i) => (
+        <EntryCard
+          // biome-ignore lint/suspicious/noArrayIndexKey: entries have no stable id and are reorderable by index
+          key={i}
+          title={project.title.text}
+          subtitle={project.technologies.slice(0, 3).join(" · ")}
+          defaultOpen={!project.title.text}
+          onRemove={() => onChange(projects.filter((_, j) => j !== i))}
+          onMoveUp={
+            i > 0 ? () => onChange(moveItem(projects, i, i - 1)) : undefined
+          }
+          onMoveDown={
+            i < projects.length - 1
+              ? () => onChange(moveItem(projects, i, i + 1))
+              : undefined
+          }
+        >
+          <ImagePicker
+            label="Cover image"
+            value={project.image}
+            onChange={(url) => patch(i, { image: url })}
+          />
+          <div>
+            <Label>Cover fit</Label>
+            <div className="flex gap-2">
+              {(["cover", "contain"] as const).map((fit) => {
+                const active = (project.imageFit ?? "cover") === fit;
+                return (
+                  <button
+                    key={fit}
+                    type="button"
+                    onClick={() => patch(i, { imageFit: fit })}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      active
+                        ? "border-teal-400/50 bg-teal-400/10 text-teal-300"
+                        : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                    }`}
+                  >
+                    {fit === "cover" ? "Fill (photos)" : "Fit (logos)"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Title"
+              value={project.title.text}
+              onChange={(e) =>
+                patch(i, { title: { ...project.title, text: e.target.value } })
+              }
+            />
+            <Field
+              label="Link (optional)"
+              value={project.title.link ?? ""}
+              placeholder="https://…"
+              onChange={(e) =>
+                patch(i, {
+                  title: {
+                    ...project.title,
+                    link: e.target.value || undefined,
+                  },
+                })
+              }
+            />
+          </div>
+          <Area
+            label="Description"
+            value={project.description}
+            rows={3}
+            onChange={(e) => patch(i, { description: e.target.value })}
+          />
+          <TagInput
+            label="Technologies"
+            tags={project.technologies}
+            onChange={(tags) => patch(i, { technologies: tags })}
+          />
+        </EntryCard>
+      ))}
+      <AddButton
+        label="Add project"
+        onClick={() =>
+          onChange([
+            ...projects,
+            {
+              title: { text: "" },
+              image: "",
+              description: "",
+              technologies: [],
+            },
+          ])
+        }
+      />
+    </div>
+  );
+}
+
+/* ---------- page ---------- */
+
+const TABS = [
+  "Profile",
+  "Experience",
+  "Projects",
+  "Certifications",
+  "Organizations",
+  "Contact",
+] as const;
+type Tab = (typeof TABS)[number];
 
 export default function AdminPage() {
   const [content, setContent] = useState<Content | null>(null);
+  const [savedJson, setSavedJson] = useState("");
+  const [tab, setTab] = useState<Tab>("Profile");
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/content")
       .then((r) => r.json())
-      .then((data) => setContent(data))
+      .then((data) => {
+        setContent(data);
+        setSavedJson(JSON.stringify(data));
+      })
       .catch(() => setMessage({ type: "err", text: "Failed to load content" }));
   }, []);
 
-  const uploadFile = async (field: "profileImage" | "project", projectIndex?: number): Promise<string | null> => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    return new Promise((resolve) => {
-      input.onchange = async () => {
-        const file = input.files?.[0];
-        if (!file) return resolve(null);
-        const formData = new FormData();
-        formData.set("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: formData });
-        const data = await res.json();
-        if (data.url) {
-          if (field === "profileImage" && content) setContent({ ...content, profileImage: data.url });
-          if (field === "project" && content && projectIndex !== undefined) {
-            const next = [...content.projects];
-            next[projectIndex] = { ...next[projectIndex], image: data.url };
-            setContent({ ...content, projects: next });
-          }
-          resolve(data.url);
-        } else resolve(null);
-      };
-      input.click();
-    });
-  };
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(() => setMessage(null), 4000);
+    return () => clearTimeout(t);
+  }, [message]);
+
+  if (content === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0c] font-mono text-sm text-zinc-500">
+        Loading…
+      </div>
+    );
+  }
+
+  const dirty = JSON.stringify(content) !== savedJson;
+  const update = (patch: Partial<Content>) =>
+    setContent((c) => (c ? { ...c, ...patch } : c));
 
   const save = async () => {
-    if (!content) return;
     setSaving(true);
     setMessage(null);
     try {
@@ -53,554 +562,179 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
-      setMessage({ type: "ok", text: "Saved successfully" });
+      setSavedJson(JSON.stringify(content));
+      setMessage({ type: "ok", text: "Saved" });
     } catch (e) {
-      setMessage({ type: "err", text: e instanceof Error ? e.message : "Save failed" });
+      setMessage({
+        type: "err",
+        text: e instanceof Error ? e.message : "Save failed",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  if (content === null) {
-    return (
-      <div className="min-h-screen bg-[#00091d] flex items-center justify-center text-neutral-400">
-        Loading...
-      </div>
-    );
-  }
-
-  const update = (patch: Partial<Content>) => setContent((c) => (c ? { ...c, ...patch } : c));
-  const updateContact = (patch: Partial<Content["contact"]>) =>
-    setContent((c) => (c ? { ...c, contact: { ...c.contact, ...patch } } : c));
-  const setExperiences = (list: Experience[]) => update({ experiences: list });
-  const setCertifications = (list: Certification[]) => update({ certifications: list });
-  const setOrganizations = (list: Organization[]) => update({ organizations: list });
-  const setProjects = (list: Project[]) => update({ projects: list });
-
   return (
-    <div className="min-h-screen bg-[#00091d] text-neutral-300 p-6 pb-24">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Admin – Edit content</h1>
-          <a
-            href="/"
-            className="text-sm text-purple-400 hover:underline"
-          >
-            ← Back to site
-          </a>
-        </div>
-
-        {message && (
-          <p
-            className={`p-3 rounded-lg text-sm ${
-              message.type === "ok" ? "bg-green-900/40 text-green-300" : "bg-red-900/40 text-red-300"
-            }`}
-          >
-            {message.text}
-          </p>
-        )}
-
-        {/* Profile & Hero */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Profile & Hero
-          </h2>
+    <div className="min-h-screen bg-[#0a0a0c] text-zinc-300">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0a0a0c]/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <img
-              src={content.profileImage}
-              alt="Profile"
-              className="w-24 h-24 rounded-lg object-cover border border-neutral-700"
-            />
-            <div>
-              <button
-                type="button"
-                onClick={() => uploadFile("profileImage")}
-                className="rounded-lg bg-purple-700 px-3 py-1.5 text-sm hover:bg-purple-600"
+            <a href="/" className="font-mono text-sm text-zinc-100">
+              calvin<span className="text-teal-300">.hendra</span>
+              <span className="ml-2 text-zinc-500">/ admin</span>
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            {message && (
+              <span
+                className={`font-mono text-xs ${
+                  message.type === "ok" ? "text-teal-300" : "text-red-400"
+                }`}
               >
-                Upload photo
+                {message.text}
+              </span>
+            )}
+            {dirty && !message && (
+              <span className="font-mono text-xs text-amber-400">
+                unsaved changes
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving || !dirty}
+              className="rounded-lg bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+        {/* Tabs */}
+        <div className="mx-auto max-w-3xl overflow-x-auto px-6">
+          <div className="flex gap-1 pb-2">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                  tab === t
+                    ? "bg-zinc-800 text-zinc-100"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {t}
               </button>
-              <input
-                type="text"
-                value={content.profileImage}
-                onChange={(e) => update({ profileImage: e.target.value })}
-                placeholder="Or paste image URL"
-                className="mt-2 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl space-y-4 px-6 py-8 pb-24">
+        {tab === "Profile" && (
+          <div className="space-y-4">
+            <ImagePicker
+              label="Profile photo"
+              value={content.profileImage}
+              onChange={(url) => update({ profileImage: url })}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Full name"
+                value={content.name}
+                onChange={(e) => update({ name: e.target.value })}
+              />
+              <Field
+                label="Nickname"
+                value={content.nickname}
+                onChange={(e) => update({ nickname: e.target.value })}
               />
             </div>
-          </div>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Full name</span>
-            <input
-              type="text"
-              value={content.name}
-              onChange={(e) => update({ name: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Nickname</span>
-            <input
-              type="text"
-              value={content.nickname}
-              onChange={(e) => update({ nickname: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Position / title</span>
-            <input
-              type="text"
+            <Field
+              label="Position / title"
               value={content.position}
               onChange={(e) => update({ position: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
             />
-          </label>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Hero bio (paragraph)</span>
-            <textarea
+            <Area
+              label="Hero bio"
               value={content.heroContent}
+              rows={6}
               onChange={(e) => update({ heroContent: e.target.value })}
-              rows={5}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 resize-y"
             />
-          </label>
-        </section>
+          </div>
+        )}
 
-        {/* Contact */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Contact
-          </h2>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Email</span>
-            <input
+        {tab === "Experience" && (
+          <TimelineEditor
+            items={content.experiences}
+            onChange={(experiences) => update({ experiences })}
+            addLabel="Add experience"
+            roleLabel="Role"
+            companyLabel="Company"
+          />
+        )}
+
+        {tab === "Projects" && (
+          <ProjectsEditor
+            projects={content.projects}
+            onChange={(projects) => update({ projects })}
+          />
+        )}
+
+        {tab === "Certifications" && (
+          <TimelineEditor
+            items={content.certifications}
+            onChange={(certifications) => update({ certifications })}
+            addLabel="Add certification"
+            roleLabel="Title"
+            companyLabel="Issuer"
+          />
+        )}
+
+        {tab === "Organizations" && (
+          <TimelineEditor
+            items={content.organizations}
+            onChange={(organizations) => update({ organizations })}
+            addLabel="Add organization"
+            roleLabel="Role"
+            companyLabel="Organization"
+          />
+        )}
+
+        {tab === "Contact" && (
+          <div className="space-y-4">
+            <Field
+              label="Email"
               type="email"
               value={content.contact.email}
-              onChange={(e) => updateContact({ email: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
+              onChange={(e) =>
+                update({
+                  contact: { ...content.contact, email: e.target.value },
+                })
+              }
             />
-          </label>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Phone</span>
-            <input
-              type="text"
+            <Field
+              label="Phone"
               value={content.contact.phoneNo}
-              onChange={(e) => updateContact({ phoneNo: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
+              onChange={(e) =>
+                update({
+                  contact: { ...content.contact, phoneNo: e.target.value },
+                })
+              }
             />
-          </label>
-          <label className="block">
-            <span className="text-sm text-neutral-400">Location / Domicile</span>
-            <input
-              type="text"
+            <Field
+              label="Location / domicile"
               value={content.contact.domicile}
-              onChange={(e) => updateContact({ domicile: e.target.value })}
-              className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2"
+              onChange={(e) =>
+                update({
+                  contact: { ...content.contact, domicile: e.target.value },
+                })
+              }
             />
-          </label>
-        </section>
-
-        {/* Experiences */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Experiences
-          </h2>
-          {content.experiences.map((exp, i) => (
-            <div key={i} className="rounded-lg border border-neutral-700 p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-neutral-500">Experience {i + 1}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExperiences(content.experiences.filter((_, j) => j !== i))
-                  }
-                  className="text-red-400 text-sm hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-              <input
-                placeholder="Year"
-                value={exp.year}
-                onChange={(e) => {
-                  const next = [...content.experiences];
-                  next[i] = { ...next[i], year: e.target.value };
-                  setExperiences(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Role"
-                value={exp.role}
-                onChange={(e) => {
-                  const next = [...content.experiences];
-                  next[i] = { ...next[i], role: e.target.value };
-                  setExperiences(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Company"
-                value={exp.company}
-                onChange={(e) => {
-                  const next = [...content.experiences];
-                  next[i] = { ...next[i], company: e.target.value };
-                  setExperiences(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <textarea
-                placeholder="Description"
-                value={exp.description}
-                onChange={(e) => {
-                  const next = [...content.experiences];
-                  next[i] = { ...next[i], description: e.target.value };
-                  setExperiences(next);
-                }}
-                rows={3}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm resize-y"
-              />
-              <input
-                placeholder="Technologies (comma-separated)"
-                value={exp.technologies.join(", ")}
-                onChange={(e) => {
-                  const next = [...content.experiences];
-                  next[i] = {
-                    ...next[i],
-                    technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                  };
-                  setExperiences(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setExperiences([
-                ...content.experiences,
-                {
-                  year: "",
-                  role: "",
-                  company: "",
-                  description: "",
-                  technologies: [],
-                },
-              ])
-            }
-            className="rounded-lg border border-dashed border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:border-purple-500 hover:text-purple-400"
-          >
-            + Add experience
-          </button>
-        </section>
-
-        {/* Certifications */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Certifications
-          </h2>
-          {content.certifications.map((cert, i) => (
-            <div key={i} className="rounded-lg border border-neutral-700 p-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-neutral-500">Cert {i + 1}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCertifications(content.certifications.filter((_, j) => j !== i))
-                  }
-                  className="text-red-400 text-sm hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-              <input
-                placeholder="Year"
-                value={cert.year}
-                onChange={(e) => {
-                  const next = [...content.certifications];
-                  next[i] = { ...next[i], year: e.target.value };
-                  setCertifications(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Role / Title"
-                value={cert.role}
-                onChange={(e) => {
-                  const next = [...content.certifications];
-                  next[i] = { ...next[i], role: e.target.value };
-                  setCertifications(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Company / Issuer"
-                value={cert.company}
-                onChange={(e) => {
-                  const next = [...content.certifications];
-                  next[i] = { ...next[i], company: e.target.value };
-                  setCertifications(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <textarea
-                placeholder="Description"
-                value={cert.description}
-                onChange={(e) => {
-                  const next = [...content.certifications];
-                  next[i] = { ...next[i], description: e.target.value };
-                  setCertifications(next);
-                }}
-                rows={2}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm resize-y"
-              />
-              <input
-                placeholder="Technologies (comma-separated)"
-                value={cert.technologies.join(", ")}
-                onChange={(e) => {
-                  const next = [...content.certifications];
-                  next[i] = {
-                    ...next[i],
-                    technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                  };
-                  setCertifications(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setCertifications([
-                ...content.certifications,
-                { year: "", role: "", company: "", description: "", technologies: [] },
-              ])
-            }
-            className="rounded-lg border border-dashed border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:border-purple-500 hover:text-purple-400"
-          >
-            + Add certification
-          </button>
-        </section>
-
-        {/* Organizations */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Organizations
-          </h2>
-          {content.organizations.map((org, i) => (
-            <div key={i} className="rounded-lg border border-neutral-700 p-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-neutral-500">Org {i + 1}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOrganizations(content.organizations.filter((_, j) => j !== i))
-                  }
-                  className="text-red-400 text-sm hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-              <input
-                placeholder="Year"
-                value={org.year}
-                onChange={(e) => {
-                  const next = [...content.organizations];
-                  next[i] = { ...next[i], year: e.target.value };
-                  setOrganizations(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Role"
-                value={org.role}
-                onChange={(e) => {
-                  const next = [...content.organizations];
-                  next[i] = { ...next[i], role: e.target.value };
-                  setOrganizations(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Company / Org name"
-                value={org.company}
-                onChange={(e) => {
-                  const next = [...content.organizations];
-                  next[i] = { ...next[i], company: e.target.value };
-                  setOrganizations(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <textarea
-                placeholder="Description"
-                value={org.description}
-                onChange={(e) => {
-                  const next = [...content.organizations];
-                  next[i] = { ...next[i], description: e.target.value };
-                  setOrganizations(next);
-                }}
-                rows={2}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm resize-y"
-              />
-              <input
-                placeholder="Technologies / tags (comma-separated)"
-                value={org.technologies.join(", ")}
-                onChange={(e) => {
-                  const next = [...content.organizations];
-                  next[i] = {
-                    ...next[i],
-                    technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                  };
-                  setOrganizations(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setOrganizations([
-                ...content.organizations,
-                { year: "", role: "", company: "", description: "", technologies: [] },
-              ])
-            }
-            className="rounded-lg border border-dashed border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:border-purple-500 hover:text-purple-400"
-          >
-            + Add organization
-          </button>
-        </section>
-
-        {/* Projects */}
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-neutral-700 pb-2">
-            Projects
-          </h2>
-          {content.projects.map((proj, i) => (
-            <div key={i} className="rounded-lg border border-neutral-700 p-4 space-y-3">
-              <div className="flex justify-between items-start gap-4">
-                <span className="text-sm text-neutral-500">Project {i + 1}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setProjects(content.projects.filter((_, j) => j !== i))
-                  }
-                  className="text-red-400 text-sm hover:underline shrink-0"
-                >
-                  Remove
-                </button>
-              </div>
-              <div className="flex items-center gap-3">
-                <img
-                  src={proj.image}
-                  alt=""
-                  className="w-20 h-20 rounded object-cover border border-neutral-700"
-                />
-                <div className="flex-1 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => uploadFile("project", i)}
-                    className="rounded bg-purple-700 px-2 py-1 text-xs hover:bg-purple-600"
-                  >
-                    Upload image
-                  </button>
-                  <input
-                    type="text"
-                    placeholder="Image URL"
-                    value={proj.image}
-                    onChange={(e) => {
-                      const next = [...content.projects];
-                      next[i] = { ...next[i], image: e.target.value };
-                      setProjects(next);
-                    }}
-                    className="mt-1 w-full rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
-                  />
-                </div>
-              </div>
-              <input
-                placeholder="Project title"
-                value={proj.title.text}
-                onChange={(e) => {
-                  const next = [...content.projects];
-                  next[i] = {
-                    ...next[i],
-                    title: { ...next[i].title, text: e.target.value },
-                  };
-                  setProjects(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <input
-                placeholder="Project link (optional)"
-                value={proj.title.link ?? ""}
-                onChange={(e) => {
-                  const next = [...content.projects];
-                  next[i] = {
-                    ...next[i],
-                    title: { ...next[i].title, link: e.target.value || undefined },
-                  };
-                  setProjects(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-              <textarea
-                placeholder="Description"
-                value={proj.description}
-                onChange={(e) => {
-                  const next = [...content.projects];
-                  next[i] = { ...next[i], description: e.target.value };
-                  setProjects(next);
-                }}
-                rows={2}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm resize-y"
-              />
-              <input
-                placeholder="Technologies (comma-separated)"
-                value={proj.technologies.join(", ")}
-                onChange={(e) => {
-                  const next = [...content.projects];
-                  next[i] = {
-                    ...next[i],
-                    technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                  };
-                  setProjects(next);
-                }}
-                className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setProjects([
-                ...content.projects,
-                {
-                  title: { text: "" },
-                  image: "",
-                  description: "",
-                  technologies: [],
-                },
-              ])
-            }
-            className="rounded-lg border border-dashed border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:border-purple-500 hover:text-purple-400"
-          >
-            + Add project
-          </button>
-        </section>
-
-        <div className="sticky bottom-4 flex justify-end">
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="rounded-xl bg-purple-700 px-6 py-3 font-medium text-white hover:bg-purple-600 disabled:opacity-60"
-          >
-            {saving ? "Saving..." : "Save all content"}
-          </button>
-        </div>
-      </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
