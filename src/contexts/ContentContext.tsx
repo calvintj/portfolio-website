@@ -2,13 +2,13 @@
 
 import {
   createContext,
-  useState,
-  useEffect,
-  useCallback,
   type ReactNode,
+  useCallback,
+  useEffect,
+  useState,
 } from "react";
-import type { Content, ContentContextValue } from "@/types/content";
 import { getDefaultContent } from "@/lib/content";
+import type { Content, ContentContextValue } from "@/types/content";
 
 export const ContentContext = createContext<ContentContextValue | null>(null);
 

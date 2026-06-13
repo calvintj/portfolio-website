@@ -3,15 +3,20 @@ import { readContent } from "@/lib/content-server";
 const DEEPINFRA_URL = "https://api.deepinfra.com/v1/openai/chat/completions";
 const MODEL = "openai/gpt-oss-20b";
 
-function buildSystemPrompt(content: Awaited<ReturnType<typeof readContent>>): string {
+function buildSystemPrompt(
+  content: Awaited<ReturnType<typeof readContent>>,
+): string {
   const experiencesText = content.experiences
     .map(
       (e) =>
-        `- ${e.role} at ${e.company} (${e.year}): ${e.description.trim()} Technologies: ${e.technologies.join(", ")}`
+        `- ${e.role} at ${e.company} (${e.year}): ${e.description.trim()} Technologies: ${e.technologies.join(", ")}`,
     )
     .join("\n");
   const projectsText = content.projects
-    .map((p) => `- ${p.title.text}: ${p.description} Technologies: ${p.technologies.join(", ")}`)
+    .map(
+      (p) =>
+        `- ${p.title.text}: ${p.description} Technologies: ${p.technologies.join(", ")}`,
+    )
     .join("\n");
   const certsText = content.certifications
     .map((c) => `- ${c.role} at ${c.company} (${c.year}): ${c.description}`)
@@ -47,13 +52,18 @@ export async function POST(req: Request) {
     if (!apiKey) {
       return Response.json(
         { error: "DEEPINFRA_API_KEY is not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    const { messages } = (await req.json()) as { messages: { role: string; content: string }[] };
+    const { messages } = (await req.json()) as {
+      messages: { role: string; content: string }[];
+    };
     if (!Array.isArray(messages) || messages.length === 0) {
-      return Response.json({ error: "messages array required" }, { status: 400 });
+      return Response.json(
+        { error: "messages array required" },
+        { status: 400 },
+      );
     }
 
     const content = await readContent();
@@ -85,7 +95,7 @@ export async function POST(req: Request) {
       console.error("DeepInfra API error:", res.status, err);
       return Response.json(
         { error: "LLM request failed", details: err },
-        { status: res.status }
+        { status: res.status },
       );
     }
 
@@ -105,7 +115,7 @@ export async function POST(req: Request) {
     console.error("Chat API error:", e);
     return Response.json(
       { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

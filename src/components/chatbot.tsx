@@ -11,16 +11,15 @@ const ERROR_MESSAGE = "Something went wrong. Please try again.";
 function formatMessage(text: string) {
   const lines = text.split("\n");
   return lines.map((line, i) => {
-    const parts = line
-      .split(/(\*\*[^*]+\*\*)/g)
-      .map((part, j) =>
-        part.startsWith("**") && part.endsWith("**") ? (
-          <strong key={`${i}-${j}`}>{part.slice(2, -2)}</strong>
-        ) : (
-          part
-        ),
-      );
+    const parts = line.split(/(\*\*[^*]+\*\*)/g).map((part, j) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        // biome-ignore lint/suspicious/noArrayIndexKey: positional text segments have no stable id
+        return <strong key={`${i}-${j}`}>{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
     return (
+      // biome-ignore lint/suspicious/noArrayIndexKey: rendered text lines have no stable id
       <span key={i}>
         {parts}
         {i < lines.length - 1 && <br />}
@@ -61,7 +60,7 @@ export default function Chatbot() {
       top: listRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages, loading, streamingContent]);
+  }, []);
 
   const send = async () => {
     const text = input.trim();
@@ -150,6 +149,8 @@ export default function Chatbot() {
           {isOpen ? (
             <motion.svg
               key="close"
+              role="img"
+              aria-label="Close chat"
               className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
@@ -169,6 +170,8 @@ export default function Chatbot() {
           ) : (
             <motion.svg
               key="open"
+              role="img"
+              aria-label="Open chat"
               className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
@@ -208,6 +211,7 @@ export default function Chatbot() {
             <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((m, i) => (
                 <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: append-only chat log
                   key={i}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
