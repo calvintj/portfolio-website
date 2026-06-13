@@ -10,32 +10,13 @@ services:
     expose:
       - "3000"
     restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
-    environment:
-      - DOMAIN=${DOMAIN:-calvinhendra.com}
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - web
-    restart: unless-stopped
     networks:
-      - default
       - homebase_net
 
 volumes:
   content_data:
   content_uploads:
-  caddy_data:
-  caddy_config:
 
 networks:
-  default:
   homebase_net:
     external: true
