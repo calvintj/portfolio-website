@@ -1,6 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     console.error("Upload error:", e);
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Upload failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -60,11 +60,7 @@
       "role": "Financial Markets",
       "company": "Yale University — Coursera",
       "description": "Completed Yale University's Financial Markets course on Coursera, covering financial markets, risk management, behavioural finance, and investment principles.",
-      "technologies": [
-        "Financial Markets",
-        "Risk Management",
-        "Investment"
-      ]
+      "technologies": ["Financial Markets", "Risk Management", "Investment"]
     },
     {
       "year": "May 2024",
@@ -93,9 +89,7 @@
       "role": "Member",
       "company": "Google Developer Student Club ",
       "description": "Participated in training sessions organised by the club, gaining valuable skills in both technical and non-technical areas",
-      "technologies": [
-        "Coding"
-      ]
+      "technologies": ["Coding"]
     },
     {
       "year": "Mar 2023 — Jan 2024",
@@ -187,12 +181,7 @@
       },
       "image": "/project-1.png",
       "description": "Led the development of MulaiDulu, a coaching platform aimed at empowering MSMEs and individuals to grow their businesses.",
-      "technologies": [
-        "HTML",
-        "Bootstrap",
-        "Laravel",
-        "MySQL"
-      ],
+      "technologies": ["HTML", "Bootstrap", "Laravel", "MySQL"],
       "imageFit": "contain"
     },
     {
@@ -201,12 +190,7 @@
       },
       "image": "/project-2.jpg",
       "description": "Led the development of MakanGak, a website on food options around Binus University, to assist new students in finding meals.",
-      "technologies": [
-        "JavaScript",
-        "React",
-        "Node.js",
-        "MySQL"
-      ]
+      "technologies": ["JavaScript", "React", "Node.js", "MySQL"]
     }
   ],
   "contact": {

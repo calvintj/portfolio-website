@@ -1,15 +1,15 @@
-import type { Content } from "@/types/content";
 import {
+  CERTIFICATIONS,
+  CONTACT,
+  EXPERIENCES,
+  HERO_CONTENT,
   NAME,
   NICKNAME,
-  POSITION,
-  HERO_CONTENT,
-  EXPERIENCES,
-  PROJECTS,
-  CONTACT,
-  CERTIFICATIONS,
   ORGANIZATIONS,
+  POSITION,
+  PROJECTS,
 } from "@/constants";
+import type { Content } from "@/types/content";
 
 /** Client-safe: no Node.js APIs. Used by ContentContext and as fallback. */
 export function getDefaultContent(): Content {

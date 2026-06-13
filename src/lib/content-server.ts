@@ -1,7 +1,7 @@
-import { readFile } from "fs/promises";
-import path from "path";
-import type { Content } from "@/types/content";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { getDefaultContent } from "@/lib/content";
+import type { Content } from "@/types/content";
 
 const CONTENT_PATH = path.join(process.cwd(), "data", "content.json");
 

@@ -1,6 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { getDefaultContent } from "@/lib/content";
 import { readContent } from "@/lib/content-server";
 import type { Content } from "@/types/content";
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     console.error("Content POST error:", e);
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Failed to save" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
