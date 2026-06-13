@@ -1,0 +1,193 @@
+name: Deploy portfolio-website - Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "Skip tests before deploying"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-portfolio-to-ec2
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Tests
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: Docker Build and EC2 Deployment
+    needs: [test]
+    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Clean target directory on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          command_timeout: 5m
+          script: |
+            export PATH="$PATH:/usr/bin:/usr/local/bin:/snap/bin"
+            echo "Starting cleanup process..."
+            TARGET_DIR="/home/${{ secrets.AWS_USER }}/portfolio-website"
+
+            # Force-kill running project containers to avoid graceful-shutdown hangs
+            if command -v docker &> /dev/null; then
+              echo "Force-killing project containers..."
+              docker ps -q --filter "label=com.docker.compose.project=portfolio-website" | xargs -r docker kill 2>/dev/null || true
+              echo "Pre-cleanup: pruning dangling build cache and images..."
+              timeout 60 docker builder prune -f 2>/dev/null || true
+              timeout 60 docker image prune -f 2>/dev/null || true
+            fi
+
+            # Stop the stack (named volumes for content + TLS certs survive this)
+            if command -v docker &> /dev/null && [ -d "$TARGET_DIR" ] && [ -f "$TARGET_DIR/docker-compose.prod.yml" ]; then
+              echo "Stopping existing containers..."
+              cd "$TARGET_DIR"
+              timeout 60 docker compose -f docker-compose.prod.yml down -t 0 --remove-orphans 2>/dev/null || true
+            fi
+
+            # Replace source files (state lives in Docker named volumes, not here)
+            echo "Cleaning old deployment files..."
+            mkdir -p "$TARGET_DIR"
+            find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+
+      - name: Copy Project Files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          source: "./"
+          target: "/home/${{ secrets.AWS_USER }}/portfolio-website"
+          strip_components: 1
+
+      - name: Deploy Application on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_USER: ${{ secrets.AWS_USER }}
+          DEEPINFRA_API_KEY: ${{ secrets.DEEPINFRA_API_KEY }}
+          DOMAIN: ${{ vars.DOMAIN }}
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          command_timeout: 30m
+          envs: DEPLOY_USER,DEEPINFRA_API_KEY,DOMAIN
+          script: |
+            set -e
+            export PATH="$PATH:/usr/bin:/usr/local/bin:/snap/bin"
+
+            # Ensure Docker is installed
+            if ! command -v docker &> /dev/null; then
+                echo "Docker not found. Installing..."
+                if grep -qi "amazon" /etc/os-release; then
+                    sudo yum update -y
+                    sudo yum install -y docker
+                else
+                    curl -fsSL https://get.docker.com -o get-docker.sh
+                    sudo sh get-docker.sh
+                fi
+                sudo usermod -aG docker "$USER" || true
+            fi
+
+            # On Amazon Linux, ensure compose + buildx plugins are present
+            if grep -qi "amazon" /etc/os-release; then
+                sudo mkdir -p /usr/local/lib/docker/cli-plugins
+                ARCH=$(uname -m)
+                case "$ARCH" in
+                    x86_64)  BUILDX_ARCH="amd64" ;;
+                    aarch64) BUILDX_ARCH="arm64" ;;
+                    *)       BUILDX_ARCH="$ARCH" ;;
+                esac
+                if [ ! -f "/usr/local/lib/docker/cli-plugins/docker-compose" ]; then
+                    echo "Installing Docker Compose plugin..."
+                    sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+                    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+                fi
+                MIN_BUILDX="0.17.0"
+                NEED_BUILDX=false
+                if ! docker buildx version &> /dev/null; then
+                    NEED_BUILDX=true
+                else
+                    CURRENT_BUILDX=$(docker buildx version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+                    if [ "$(printf '%s\n' "$MIN_BUILDX" "$CURRENT_BUILDX" | sort -V | head -1)" != "$MIN_BUILDX" ]; then
+                        NEED_BUILDX=true
+                    fi
+                fi
+                if [ "$NEED_BUILDX" = true ]; then
+                    echo "Installing/upgrading Docker buildx (>= $MIN_BUILDX)..."
+                    sudo rm -f /usr/local/lib/docker/cli-plugins/docker-buildx
+                    BUILDX_VERSION=$(curl -s https://api.github.com/repos/docker/buildx/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+                    sudo curl -SL "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-${BUILDX_ARCH}" -o /usr/local/lib/docker/cli-plugins/docker-buildx
+                    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+                fi
+            fi
+
+            # Ensure Docker daemon is running, then relax socket perms for this session
+            sudo systemctl enable docker --now || sudo service docker start || true
+            sudo chmod 666 /var/run/docker.sock || true
+
+            TARGET_DIR="/home/$DEPLOY_USER/portfolio-website"
+            cd "$TARGET_DIR"
+
+            # Runtime configuration
+            export COMPOSE_PROJECT_NAME=portfolio-website
+            export DEEPINFRA_API_KEY="$DEEPINFRA_API_KEY"
+            export DOMAIN="${DOMAIN:-calvinhendra.com}"
+            echo "Deploying for domain: $DOMAIN"
+
+            echo "Setting up Docker build environment..."
+            export BUILDKIT_PROGRESS=plain
+            export COMPOSE_DOCKER_CLI_BUILD=1
+            export DOCKER_BUILDKIT=1
+
+            # Ensure swap exists to prevent OOM during the Next.js build
+            if [ ! -f /swapfile ]; then
+              echo "Creating 4GB swap file..."
+              sudo dd if=/dev/zero of=/swapfile bs=128M count=32
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+            elif ! swapon --show | grep -q /swapfile; then
+              echo "Enabling existing swap file..."
+              sudo swapon /swapfile || true
+            fi
+            echo "Swap status:"
+            free -h
+
+            echo "Stopping existing containers..."
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+
+            echo "Cleaning up Docker resources to free space..."
+            docker builder prune -f
+            docker image prune -f
+
+            echo "Building web image..."
+            docker compose --progress=plain -f docker-compose.prod.yml build web
+
+            echo "Starting containers..."
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+
+            echo "Verifying service health..."
+            sleep 5
+            if ! docker compose -f docker-compose.prod.yml ps | grep -q "Up\|running"; then
+                echo "Error: one or more services failed to start."
+                docker compose -f docker-compose.prod.yml logs --tail 100
+                exit 1
+            fi
+
+            echo "Deployment completed successfully!"
