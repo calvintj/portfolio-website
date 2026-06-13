@@ -1,0 +1,34 @@
+services:
+  web:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
+    volumes:
+      # Persist admin-edited content and uploaded images across deploys
+      - content_data:/app/data
+      - content_uploads:/app/public/uploads
+    expose:
+      - "3000"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      - DOMAIN=${DOMAIN:-calvinhendra.com}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  content_data:
+  content_uploads:
+  caddy_data:
+  caddy_config:
