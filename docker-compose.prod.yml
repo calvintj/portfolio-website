@@ -5,7 +5,6 @@ services:
       - NODE_ENV=production
       - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
     volumes:
-      # Persist admin-edited content and uploaded images across deploys
       - content_data:/app/data
       - content_uploads:/app/public/uploads
     expose:
@@ -26,9 +25,17 @@ services:
     depends_on:
       - web
     restart: unless-stopped
+    networks:
+      - default
+      - homebase_net
 
 volumes:
   content_data:
   content_uploads:
   caddy_data:
   caddy_config:
+
+networks:
+  default:
+  homebase_net:
+    external: true
