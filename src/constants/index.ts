@@ -1,93 +1,122 @@
-// Project images: place project-1.png, project-2.jpg, project-3.jpg, project-4.jpg, project-bati.png in public/projects/
+// Build-time default content. Keep in sync with data/content.json,
+// which is what the live site serves.
 
 export const NAME = "Calvin Hendra";
 export const NICKNAME = "Calvin";
-export const POSITION = "Software Engineer";
-export const HERO_CONTENT = `Final-year Computer Science student and Software Engineer Intern with hands-on experience delivering end-to-end applications in a fintech and AI-driven environment. Experienced in backend systems, API development, database design, AI-powered integration, and frontend development for building complete, production-ready applications. Comfortable working on complex problem-solving tasks, debugging system-level issues, and collaborating in team-based development to deliver reliable solutions.`;
+export const POSITION = "Software Engineer & AI Engineer";
+export const HERO_CONTENT =
+  "Software and AI engineer who turns business problems into production AI products, from a sales assistant on live Shopify stores to a legal case platform for a mining company. Nearly two years shipping end to end across LLM applications, backend APIs, web apps and cloud infrastructure. Thrives in fast-moving startup environments and consistently delivers production-ready work with measurable business impact.";
+
+export const CV_URL =
+  "https://docs.google.com/document/d/1s-pXdsFw3TXNT8wPUEWXIGIXaIY6X9fvZg_muX5plJA/edit";
 
 export const EXPERIENCES = [
   {
-    year: "February 2026 - Present",
-    role: "Software Engineer",
-    company: "PT Bati Investasi Teknologi",
-    description: `
-Led the development and maintenance of a widget-based AI sales agent embedded into client websites to support user acquisition and conversion.
-
-Owned full-stack feature development, including LLM-based workflows using Retrieval-Augmented Generation (RAG), along with system observability through tracing and monitoring.
-
-Collaborated closely with product and business teams to align AI behavior with financial domain constraints and sales objectives.
-    `,
+    year: "September 2026 - Present",
+    role: "IT Consultant",
+    company: "PT Merge Mining Industri",
+    description:
+      "IT consultant for a coal mining company, responsible for its application server and internal business systems.\n\n• Designed and developed the Legal Matter Tracker, an AI-powered case management platform that replaced manual document review for the legal team, summarising a 188-document case in 9 minutes at about $1.27 in AI cost.\n• Re-architected the company server onto a containerised platform with nightly off-site backups, hardened access controls and one-command releases with rollback, removing the company's dependence on a single person to operate its systems.",
     technologies: [
-      "TypeScript",
       "Next.js",
-      "React",
-      "Tailwind CSS",
       "Python",
       "FastAPI",
-      "LangChain",
-      "RAG",
       "PostgreSQL",
-      "Vector Databases",
+      "Claude API",
+      "Docker",
+      "Cloudflare",
     ],
   },
   {
-    year: "February 2025 - February 2026",
-    role: "Software Engineer Intern",
+    year: "January 2026 - Present",
+    role: "Software Engineer",
     company: "PT Bati Investasi Teknologi",
-    description: `
-  Contributed to the development of Bati's AI Wealth Management platform and the early-stage AI sales agent as part of the engineering team.
-  Worked on full-stack web features, backend APIs, and initial RAG pipelines supporting both internal wealth tools and client-facing experiences.
-  Collaborated with the trading team to support data workflows and internal tools used for financial analysis and modeling.
-    `,
+    description:
+      "Software engineer on Bati's AI products for e-commerce and financial services, owning features end to end from AI pipelines to deployment.\n\n• Shipped Bati Agent, an AI sales assistant embedded in 3 live Shopify storefronts, delivering a 30–40% conversion uplift for the first client across ~10,000 daily sessions.\n• Developed the new web application for Clever, an AI-driven WhatsApp cross-sell platform piloted with Moladin, Kredit Pintar and Bank Saqu.\n• Built BatiLabs Web, the company website and self-service merchant onboarding portal with Shopify integration and Xendit payments.\n• Managed deployment and operations for all services on AWS, including CI/CD pipelines and DNS.",
     technologies: [
-      "TypeScript",
-      "React",
-      "Next.js",
-      "Tailwind CSS",
       "Python",
       "FastAPI",
+      "TypeScript",
+      "Next.js",
+      "React",
+      "LangChain",
+      "Qdrant",
       "PostgreSQL",
+      "ClickHouse",
+      "Redis",
+      "Claude API",
+      "Docker",
+      "AWS",
+      "GitHub Actions",
+      "Shopify API",
+    ],
+  },
+  {
+    year: "February 2025 - January 2026",
+    role: "Software Engineer Intern",
+    company: "PT Bati Investasi Teknologi",
+    description:
+      "Software engineering intern on Bati's AI and wealth management products.\n\n• Built an AI financing sales chatbot that answers customer questions on vehicle installments, loans and foreign currency, combining retrieval over product documents with real-time financial calculations to give instant quotes without waiting for a sales agent.\n• Developed Bati WealthAI, a CRM for relationship managers with secure authentication, role-based access and portfolio dashboards.",
+    technologies: [
+      "Python",
+      "FastAPI",
+      "TypeScript",
+      "Next.js",
+      "React",
+      "LangChain",
+      "RAG",
+      "Qdrant",
+      "PostgreSQL",
+      "Node.js",
+      "Docker",
+      "Supabase",
     ],
   },
 ];
 
 export const CERTIFICATIONS = [
   {
+    year: "May 2026",
+    role: "Financial Markets",
+    company: "Yale University — Coursera",
+    description:
+      "Covered financial markets, risk management, behavioural finance and investment principles, supporting product work in fintech and lending.",
+    technologies: ["Financial Markets", "Risk Management", "Investment"],
+  },
+  {
     year: "May 2024",
-    role: "Certified Backend Developer with Node.js",
+    role: "Mastering Backend Development with Node.js",
     company: "BINUS Center",
-    description: `Earned certification in backend development by completing an intensive program focused on Mastering Backend Development with Node.js. Demonstrated expertise in server-side development, RESTful API design, database integration using Sequelize ORM, and middleware implementation through a rigorous assessment process.`,
+    description:
+      "Certified in backend development, covering RESTful API design, database integration with Sequelize ORM, authentication and middleware.",
     technologies: ["Node.js", "Express.js", "Sequelize", "MySQL", "REST API"],
+  },
+  {
+    year: "February 2023",
+    role: "ITversity Certification",
+    company: "Course-Net",
+    description:
+      "Completed Course-Net's ITversity certification program, covering core IT and software development fundamentals.",
+    technologies: ["Data Structures", "Algorithms"],
   },
 ];
 
 export const ORGANIZATIONS = [
   {
-    year: "Nov 2023 – July 2024",
-    role: "Member",
-    company: "Google Developer Student Club ",
-    description: `Participated in training sessions organised by the club, gaining valuable skills in both technical and non-technical areas`,
-    technologies: ["Coding"],
-  },
-  {
     year: "Mar 2023 — Jan 2024",
     role: "Creative Design Activist",
     company: "Keluarga Mahasiswa Buddhis Dhammavaddhana",
-    description: `Designed posters for social media platforms using design tools to enhance promotional materials' visual appeal and Collaborated with the marketing team to ensure designs aligned with organisational branding and messaging.`,
+    description:
+      "Designed social media posters for the organisation's programmes, working with the marketing team to keep every design consistent with its branding and messaging.",
     technologies: ["Design", "Canva", "Photoshop", "Collaboration", "Teamwork"],
   },
   {
     year: "Nov 2022 – Sept 2023",
     role: "Activist",
     company: "Bina Nusantara Computer Club",
-    description: `Coordinated with team members to develop and execute impactful work programs, ensuring successful implementation and participated in training sessions organised by the club, enhancing hard skills and soft skills`,
-    technologies: [
-      "Public Speaking",
-      "Coding",
-      "Design",
-      "Teamwork",
-      "Collaboration",
-    ],
+    description:
+      "Planned and delivered the club's work programs with a cross-functional team, and took part in technical and soft-skills training.",
+    technologies: ["Teamwork", "Collaboration", "Coding", "Public Speaking"],
   },
 ];
 
@@ -95,72 +124,131 @@ export type ProjectTitle = { text: string; link?: string };
 
 export const PROJECTS: {
   title: ProjectTitle;
-  image: string;
-  imageFit?: "cover" | "contain";
   description: string;
   technologies: string[];
 }[] = [
   {
     title: {
-      text: "Bati WealthAI",
-      // link: "https://wealthplatform.batiinvestasi.ai",
+      text: "Clever — AI Cross-Sell Platform",
     },
-    image: "/project-bati.png",
-    imageFit: "contain",
     description:
-      "Responsible for the development of Bati WealthAI, an intelligent web based CRM for relationship manager to grow their portfolio with Bati AI integration.",
+      "AI-driven cross-sell platform for financial institutions including Moladin, Kredit Pintar and Bank Saqu. Lenders hold large customer bases but struggle to know which product to offer each customer, and when. Clever picks the best offer for each customer, sends it over WhatsApp, and manages the follow-up conversation with an AI agent grounded in the customer's profile, the product catalogue and the client's business rules, handing qualified leads to sales officers.\n\n• Built the new web application: a performance dashboard by business goal, a live WhatsApp inbox with media support, lead routing to sales officers, and consent and privacy controls.\n• Leading the migration from per-client deployments to a single multi-tenant platform with isolated client data and one release process.",
     technologies: [
       "TypeScript",
-      "React.js",
+      "React",
+      "Bun",
+      "Hono",
+      "WhatsApp API",
+      "LLM",
+      "Docker",
+    ],
+  },
+  {
+    title: {
+      text: "Legal Matter Tracker",
+    },
+    description:
+      "AI-powered case management platform for MMI's legal team. Before it, every legal document was reviewed and summarised by hand, and there was no shared system to track cases. The platform takes in case documents in bulk, analyses each one with Claude, and produces case summaries with the current status, the recommended next action and page-level citations, plus a Q&A assistant for each case.\n\n• Summarises a 188-document case in 9 minutes for about $1.27 in AI cost.\n• Found all 10 known issues in a 42-file validation case before launch.\n• Live with 12 cases and 190 documents; bilingual (Indonesian/English), mobile-ready, with configurable AI cost controls.",
+    technologies: [
       "Next.js",
-      "TailwindCSS",
-      "Node.js",
-      "Express.js",
+      "FastAPI",
+      "Python",
       "PostgreSQL",
+      "LLM",
+      "Docker",
+    ],
+  },
+  {
+    title: {
+      text: "Bati Agent — AI Sales Assistant",
+    },
+    description:
+      "AI sales assistant embedded into Shopify storefronts including Kami Idea, Russ Simple Life, and Lozy. Shoppers often fail to find the right product through keyword search, especially when they describe what they need instead of a product name. Bati Agent understands natural-language questions, searches the catalogue by meaning, and recommends products in a chat widget installed with a single script.\n\n• Delivered a 30–40% conversion uplift for the first client across ~10,000 daily sessions.\n• Live on 3 storefronts, with a multi-tenant admin dashboard for each merchant.",
+    technologies: [
+      "Python",
+      "FastAPI",
+      "Next.js",
+      "LangChain",
+      "Qdrant",
+      "PostgreSQL",
+      "ClickHouse",
+      "Redis",
+      "AWS",
+      "Shopify API",
+      "Docker",
+    ],
+  },
+  {
+    title: {
+      text: "BatiLabs Web",
+      link: "https://batilabs.ai",
+    },
+    description:
+      "Company website and merchant onboarding portal for BatiLabs. Turns onboarding into a single self-service flow: merchants connect their Shopify store, install the Bati Agent script and pay through Xendit without help from the team. Deployed on AWS S3 behind Cloudflare.",
+    technologies: [
+      "TypeScript",
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "FastAPI",
+      "PostgreSQL",
+      "AWS S3",
+      "Cloudflare",
+      "Docker",
+      "Xendit",
+    ],
+  },
+  {
+    title: {
+      text: "Bati WealthAI",
+    },
+    description:
+      "CRM for Bati's relationship managers to manage client portfolios and sales pipelines in one place, with AI-assisted insights. Built secure authentication, role-based access and portfolio dashboards that give each manager a live view of their clients.",
+    technologies: ["TypeScript", "Next.js", "Node.js", "PostgreSQL", "Docker"],
+  },
+  {
+    title: {
+      text: "Vaultbook — Personal Finance App",
+    },
+    description:
+      "Personal project. A personal finance app that brings assets, liabilities, income, expenses and net worth into one dashboard, keeping cash, investments, gold, foreign currency, debts and loans in one place instead of scattered across spreadsheets.\n\n• Net worth dashboard with financial health ratios (debt-to-asset, emergency runway, savings rate) and automatic monthly snapshots.\n• Debt payoff projections with avalanche and snowball strategies, and one-click refresh of live gold and exchange-rate prices.\n• Self-hosted with Docker behind Cloudflare Access for zero-trust sign-in.",
+    technologies: [
+      "TypeScript",
+      "Next.js",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "Recharts",
+      "Docker",
+      "Cloudflare Access",
+    ],
+  },
+  {
+    title: {
+      text: "Thrive — Training & Recovery Tracker",
+    },
+    description:
+      "Personal project. Turns Garmin watch data into progress toward personal health goals: recovery (sleep, HRV, resting heart rate, stress), training toward a 5K, strength sessions, body measurements and lab follow-ups, with a monthly report.\n\n• AI coach that writes a weekly check-in and answers questions about the data, running on Claude or an open model on DeepInfra, with per-user AI spend tracking.\n• A Python worker syncs Garmin data automatically; multi-user behind Cloudflare Access.",
+    technologies: [
+      "TypeScript",
+      "Next.js",
+      "PostgreSQL",
+      "Python",
+      "LLM",
+      "Docker",
+      "Cloudflare Access",
     ],
   },
   {
     title: {
       text: "MulaiDulu",
-      // link: "https://mulaidulu.site",
     },
-    image: "/project-1.png",
-    imageFit: "contain",
     description:
-      "Led the development of MulaiDulu, a coaching platform aimed at empowering MSMEs and individuals to grow their businesses.",
-    technologies: ["HTML", "Bootstrap", "Laravel", "MySQL"],
-  },
-  {
-    title: {
-      text: "MakanGak",
-      // link: "https://makan-gak-app-fullstack.vercel.app",
-    },
-    image: "/project-2.jpg",
-    description:
-      "Led the development of MakanGak, a website on food options around Binus University, to assist new students in finding meals.",
-    technologies: ["HTML", "CSS", "JavaScript", "ReactJs", "NodeJs", "MySQL"],
-  },
-  {
-    title: {
-      text: "GymMe",
-    },
-    image: "/project-3.jpg",
-    description:
-      "A dynamic e-commerce website specialising in supplement sales.",
-    technologies: ["HTML", "CSS", "C#", "ASP.NET"],
-  },
-  {
-    title: {
-      text: "Sea of FTars",
-    },
-    image: "/project-4.jpg",
-    description: "Frontend of a interactive and responsive gaming website.",
-    technologies: ["HTML", "CSS", "JavaScript"],
+      "Coaching platform that helps MSMEs and individuals grow their businesses. Led the development of the web application.",
+    technologies: ["Bootstrap", "Laravel", "MySQL"],
   },
 ];
 
 export const CONTACT = {
-  domicile: "West Jakarta",
-  phoneNo: "+6281265571198",
+  domicile: "DKI Jakarta",
   email: "calvinhendra330@gmail.com",
 };

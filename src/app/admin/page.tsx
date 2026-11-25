@@ -130,7 +130,7 @@ function ImagePicker({
   const pick = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
+    input.accept = "image/jpeg,image/png,image/webp";
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
@@ -420,33 +420,6 @@ function ProjectsEditor({
               : undefined
           }
         >
-          <ImagePicker
-            label="Cover image"
-            value={project.image}
-            onChange={(url) => patch(i, { image: url })}
-          />
-          <div>
-            <Label>Cover fit</Label>
-            <div className="flex gap-2">
-              {(["cover", "contain"] as const).map((fit) => {
-                const active = (project.imageFit ?? "cover") === fit;
-                return (
-                  <button
-                    key={fit}
-                    type="button"
-                    onClick={() => patch(i, { imageFit: fit })}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      active
-                        ? "border-accent bg-accent/10 text-accent"
-                        : "border-rule text-muted hover:border-ink"
-                    }`}
-                  >
-                    {fit === "cover" ? "Fill (photos)" : "Fit (logos)"}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label="Title"
@@ -489,7 +462,6 @@ function ProjectsEditor({
             ...projects,
             {
               title: { text: "" },
-              image: "",
               description: "",
               technologies: [],
             },
@@ -603,6 +575,18 @@ export default function AdminPage() {
             <ThemeToggle />
             <button
               type="button"
+              onClick={async () => {
+                if (dirty && !confirm("Log out and lose unsaved changes?"))
+                  return;
+                await fetch("/api/admin/logout", { method: "POST" });
+                window.location.href = "/admin/login";
+              }}
+              className="text-sm text-muted transition-colors hover:text-ink"
+            >
+              Log out
+            </button>
+            <button
+              type="button"
               onClick={save}
               disabled={saving || !dirty}
               className="rounded-lg bg-ink px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
@@ -661,6 +645,13 @@ export default function AdminPage() {
               rows={6}
               onChange={(e) => update({ heroContent: e.target.value })}
             />
+            <Field
+              label="CV link (Google Docs link works; downloads as PDF)"
+              type="url"
+              placeholder="https://docs.google.com/document/d/…/edit"
+              value={content.cvUrl ?? ""}
+              onChange={(e) => update({ cvUrl: e.target.value })}
+            />
           </div>
         )}
 
@@ -710,15 +701,6 @@ export default function AdminPage() {
               onChange={(e) =>
                 update({
                   contact: { ...content.contact, email: e.target.value },
-                })
-              }
-            />
-            <Field
-              label="Phone"
-              value={content.contact.phoneNo}
-              onChange={(e) =>
-                update({
-                  contact: { ...content.contact, phoneNo: e.target.value },
                 })
               }
             />

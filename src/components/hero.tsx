@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FiArrowDown, FiArrowRight } from "react-icons/fi";
 import { Container, pad } from "@/components/section";
 import { useContent } from "@/hooks";
+import { cvHref } from "@/lib/cv";
 
 const ease = [0.2, 0.7, 0.2, 1] as const;
 
@@ -36,6 +37,7 @@ function NameLine({
 
 const Hero = () => {
   const { content } = useContent();
+  const cv = cvHref(content.cvUrl);
 
   // Last word of the name gets the italic line: "Calvin / Hendra."
   const words = content.name.trim().split(/\s+/);
@@ -109,14 +111,15 @@ const Hero = () => {
               {lede} {rest && <span className="text-muted">{rest}</span>}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
-              <a
-                href="/Calvin_Hendra_CV.pdf"
-                download="Calvin_Hendra_CV.pdf"
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent"
-              >
-                Download CV
-                <FiArrowDown className="h-4 w-4" />
-              </a>
+              {cv && (
+                <a
+                  href={cv}
+                  className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent"
+                >
+                  Download CV
+                  <FiArrowDown className="h-4 w-4" />
+                </a>
+              )}
               <a
                 href="#contact"
                 className="group inline-flex items-center gap-2 text-sm font-medium text-ink"

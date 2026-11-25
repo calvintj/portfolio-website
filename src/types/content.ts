@@ -24,16 +24,12 @@ export type Organization = {
 
 export type Project = {
   title: { text: string; link?: string };
-  image: string;
-  /** "contain" for logos/graphics with whitespace, "cover" (default) for photos/screenshots */
-  imageFit?: "cover" | "contain";
   description: string;
   technologies: string[];
 };
 
 export type Contact = {
   domicile: string;
-  phoneNo: string;
   email: string;
 };
 
@@ -43,6 +39,8 @@ export type Content = {
   nickname: string;
   position: string;
   heroContent: string;
+  /** Link behind Download CV; a Google Docs link is exported as PDF. */
+  cvUrl: string;
   experiences: Experience[];
   certifications: Certification[];
   organizations: Organization[];
