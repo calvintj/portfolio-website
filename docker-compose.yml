@@ -6,6 +6,8 @@ services:
     environment:
       - NODE_ENV=production
       - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - SESSION_SECRET=${SESSION_SECRET:-}
     volumes:
       # Persist admin content and uploads
       - content_data:/app/data

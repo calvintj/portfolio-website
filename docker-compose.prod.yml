@@ -4,6 +4,9 @@ services:
     environment:
       - NODE_ENV=production
       - DEEPINFRA_API_KEY=${DEEPINFRA_API_KEY:-}
+      # Unset means admin stays locked, never open.
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - SESSION_SECRET=${SESSION_SECRET:-}
     volumes:
       - content_data:/app/data
       - content_uploads:/app/public/uploads

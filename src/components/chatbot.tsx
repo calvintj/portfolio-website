@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { FiArrowUp, FiX } from "react-icons/fi";
 import { useContent } from "@/hooks";
+import { MAX_USER_CHARS } from "@/lib/chat";
 
 type Message = { role: "user" | "bot"; content: string };
 
@@ -85,8 +86,13 @@ export default function Chatbot() {
       });
 
       if (!res.ok) {
+        // The server's reason (busy, too long) is written for visitors.
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Request failed");
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", content: data.error || ERROR_MESSAGE },
+        ]);
+        return;
       }
 
       const reader = res.body?.getReader();
@@ -229,6 +235,7 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything…"
+                maxLength={MAX_USER_CHARS}
                 aria-label="Message"
                 disabled={loading}
                 className="flex-1 bg-transparent px-2 py-2 text-sm text-ink placeholder-muted outline-none disabled:opacity-60"

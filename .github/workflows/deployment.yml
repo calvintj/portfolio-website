@@ -80,13 +80,15 @@ jobs:
         env:
           DEPLOY_USER: ${{ secrets.AWS_USER }}
           DEEPINFRA_API_KEY: ${{ secrets.DEEPINFRA_API_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DOMAIN: ${{ vars.DOMAIN }}
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
           command_timeout: 30m
-          envs: DEPLOY_USER,DEEPINFRA_API_KEY,DOMAIN
+          envs: DEPLOY_USER,DEEPINFRA_API_KEY,ADMIN_PASSWORD,SESSION_SECRET,DOMAIN
           script: |
             set -e
             export PATH="$PATH:/usr/bin:/usr/local/bin:/snap/bin"
@@ -147,6 +149,8 @@ jobs:
             # Runtime configuration
             export COMPOSE_PROJECT_NAME=portfolio-website
             export DEEPINFRA_API_KEY="$DEEPINFRA_API_KEY"
+            export ADMIN_PASSWORD="$ADMIN_PASSWORD"
+            export SESSION_SECRET="$SESSION_SECRET"
             export DOMAIN="${DOMAIN:-calvinhendra.com}"
             echo "Deploying for domain: $DOMAIN"
 
