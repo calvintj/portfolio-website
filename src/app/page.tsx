@@ -10,24 +10,23 @@ import Technologies from "@/components/technologies";
 
 export const App = () => {
   return (
-    <div className="relative min-h-screen overflow-x-hidden antialiased">
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[#0a0a0c]" />
-        <div className="absolute left-1/2 top-0 h-[32rem] w-[56rem] -translate-x-1/2 rounded-full bg-teal-500/[0.07] blur-[120px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_40%,transparent_100%)]" />
-      </div>
-
+    <div className="relative min-h-screen overflow-x-clip antialiased">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-paper"
+      >
+        Skip to content
+      </a>
       <Navbar />
-      <main className="mx-auto max-w-4xl px-6 lg:px-8">
+      <main id="main">
         <Hero />
         <Technologies />
-        <Experience />
-        <Projects />
-        <Certification />
-        <Organization />
-        <Contact />
+        <Projects index={1} />
+        <Experience index={2} />
+        <Certification index={3} />
+        <Organization index={4} />
       </main>
+      <Contact index={5} />
       <Chatbot />
     </div>
   );

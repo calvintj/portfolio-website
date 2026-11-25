@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { FiArrowUp, FiX } from "react-icons/fi";
 import { useContent } from "@/hooks";
 
 type Message = { role: "user" | "bot"; content: string };
@@ -139,76 +140,46 @@ export default function Chatbot() {
       <motion.button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-teal-300 text-zinc-900 shadow-lg shadow-teal-500/20 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-[#0a0a0c]"
+        className="fixed right-4 bottom-4 z-50 inline-flex h-12 items-center gap-2.5 rounded-full bg-ink px-5 font-mono text-[11px] uppercase tracking-[0.2em] text-paper shadow-lg shadow-ink/20 transition-colors hover:bg-accent sm:right-6 sm:bottom-6"
         aria-label={isOpen ? "Close chat" : "Open chat"}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        aria-expanded={isOpen}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.97 }}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
       >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.svg
-              key="close"
-              role="img"
-              aria-label="Close chat"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              initial={{ opacity: 0, rotate: -90 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: 90 }}
-              transition={{ duration: 0.15 }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </motion.svg>
-          ) : (
-            <motion.svg
-              key="open"
-              role="img"
-              aria-label="Open chat"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              initial={{ opacity: 0, rotate: 90 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: -90 }}
-              transition={{ duration: 0.15 }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </motion.svg>
-          )}
-        </AnimatePresence>
+        {isOpen ? (
+          <FiX aria-hidden className="h-4 w-4" />
+        ) : (
+          <span aria-hidden className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-70 motion-reduce:animate-none" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+          </span>
+        )}
+        <span>{isOpen ? "Close" : "Ask my AI"}</span>
       </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
             key="chat-window"
-            className="fixed bottom-24 right-6 z-40 flex h-[min(28rem,80vh)] w-[min(22rem,95vw)] flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-[#0a0a0c] shadow-xl shadow-black/40"
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            role="dialog"
+            aria-label={`${content.nickname}'s assistant`}
+            className="fixed right-4 bottom-20 z-40 flex h-[min(32rem,75vh)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-rule bg-paper shadow-2xl shadow-ink/15 sm:right-6 sm:bottom-22"
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 32 }}
           >
-            <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900/60 px-4 py-3">
-              <div className="h-2 w-2 rounded-full bg-teal-400" />
-              <span className="text-sm font-medium text-zinc-200">
-                {content.nickname}'s assistant
-              </span>
+            <div className="border-b border-rule px-5 py-4">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+                <span className="text-accent">(AI)</span> Assistant
+              </p>
+              <p className="mt-1 font-serif text-2xl leading-none text-ink">
+                Ask about {content.nickname}
+                <span className="text-accent">.</span>
+              </p>
             </div>
-            <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto p-5">
               {messages.map((m, i) => (
                 <div
                   // biome-ignore lint/suspicious/noArrayIndexKey: append-only chat log
@@ -216,10 +187,10 @@ export default function Chatbot() {
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
+                    className={`max-w-[85%] text-sm leading-relaxed ${
                       m.role === "user"
-                        ? "bg-teal-300/10 text-zinc-200 ring-1 ring-teal-300/20"
-                        : "bg-zinc-800/80 text-zinc-300"
+                        ? "rounded-2xl rounded-br-sm bg-ink px-4 py-2 text-paper"
+                        : "border-l-2 border-accent pl-3 text-ink"
                     }`}
                   >
                     <div className="whitespace-pre-wrap">
@@ -230,47 +201,47 @@ export default function Chatbot() {
               ))}
               {streamingContent && (
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300">
+                  <div className="max-w-[85%] border-l-2 border-accent pl-3 text-sm leading-relaxed text-ink">
                     <div className="whitespace-pre-wrap">
                       {formatMessage(streamingContent)}
-                      <span className="inline-block w-2 h-4 ml-0.5 bg-teal-400 animate-pulse align-middle" />
+                      <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-accent align-middle" />
                     </div>
                   </div>
                 </div>
               )}
               {loading && !streamingContent && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-400 animate-pulse">
-                    Thinking...
+                  <div className="animate-pulse border-l-2 border-rule pl-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+                    Thinking…
                   </div>
                 </div>
               )}
             </div>
-            <div className="border-t border-zinc-800 bg-zinc-900/40 p-3">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  send();
-                }}
-                className="flex gap-2"
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                send();
+              }}
+              className="flex items-center gap-2 border-t border-rule px-3 py-3"
+            >
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything…"
+                aria-label="Message"
+                disabled={loading}
+                className="flex-1 bg-transparent px-2 py-2 text-sm text-ink placeholder-muted outline-none disabled:opacity-60"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                aria-label="Send"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper transition-colors hover:bg-accent disabled:opacity-40"
               >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything..."
-                  disabled={loading}
-                  className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 text-sm text-zinc-300 placeholder-zinc-500 outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 disabled:opacity-60"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:opacity-60"
-                >
-                  Send
-                </button>
-              </form>
-            </div>
+                <FiArrowUp className="h-4 w-4" />
+              </button>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>

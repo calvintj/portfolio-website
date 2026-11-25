@@ -15,16 +15,17 @@ import {
   FiUpload,
   FiX,
 } from "react-icons/fi";
+import ThemeToggle from "@/components/theme-toggle";
 import type { Content, Project } from "@/types/content";
 
 /* ---------- form primitives ---------- */
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none transition-colors focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50";
+  "w-full rounded-lg border border-rule bg-paper-2 px-3 py-2 text-sm text-ink placeholder-muted/60 outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/50";
 
 function Label({ children }: { children: ReactNode }) {
   return (
-    <span className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-500">
+    <span className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-muted">
       {children}
     </span>
   );
@@ -77,18 +78,18 @@ function TagInput({
   return (
     <div>
       <Label>{label}</Label>
-      <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2 py-1.5 transition-colors focus-within:border-teal-400/50 focus-within:ring-1 focus-within:ring-teal-400/50">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-rule bg-paper-2 px-2 py-1.5 transition-colors focus-within:border-accent/50 focus-within:ring-1 focus-within:ring-accent/50">
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 font-mono text-xs text-zinc-300"
+            className="inline-flex items-center gap-1 rounded-full border border-rule bg-paper-2 px-2 py-0.5 font-mono text-xs text-ink"
           >
             {tag}
             <button
               type="button"
               aria-label={`Remove ${tag}`}
               onClick={() => onChange(tags.filter((t) => t !== tag))}
-              className="text-zinc-500 hover:text-red-400"
+              className="text-muted hover:text-danger"
             >
               <FiX className="h-3 w-3" />
             </button>
@@ -107,7 +108,7 @@ function TagInput({
             }
           }}
           placeholder={tags.length ? "" : "Type and press Enter…"}
-          className="min-w-28 flex-1 bg-transparent px-1 py-0.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none"
+          className="min-w-28 flex-1 bg-transparent px-1 py-0.5 text-sm text-ink placeholder-muted/60 outline-none"
         />
       </div>
     </div>
@@ -158,11 +159,11 @@ function ImagePicker({
     <div>
       <Label>{label}</Label>
       <div className="flex items-start gap-3">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-rule bg-paper-2">
           {value ? (
             <img src={value} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="font-mono text-[10px] text-zinc-600">none</span>
+            <span className="font-mono text-[10px] text-muted/70">none</span>
           )}
         </div>
         <div className="min-w-0 flex-1 space-y-2">
@@ -170,7 +171,7 @@ function ImagePicker({
             type="button"
             onClick={pick}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-teal-400/50 hover:text-teal-300 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-rule px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-50"
           >
             <FiUpload className="h-3.5 w-3.5" />
             {uploading ? "Uploading…" : "Upload image"}
@@ -181,7 +182,7 @@ function ImagePicker({
             placeholder="or paste an image URL"
             className={inputClass}
           />
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-danger">{error}</p>}
         </div>
       </div>
     </div>
@@ -209,7 +210,7 @@ function EntryCard({
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30">
+    <div className="rounded-xl border border-rule bg-paper-2">
       <div className="flex items-center gap-2 px-4 py-3">
         <button
           type="button"
@@ -217,15 +218,15 @@ function EntryCard({
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
           {open ? (
-            <FiChevronUp className="h-4 w-4 shrink-0 text-zinc-500" />
+            <FiChevronUp className="h-4 w-4 shrink-0 text-muted" />
           ) : (
-            <FiChevronDown className="h-4 w-4 shrink-0 text-zinc-500" />
+            <FiChevronDown className="h-4 w-4 shrink-0 text-muted" />
           )}
-          <span className="truncate text-sm font-medium text-zinc-200">
+          <span className="truncate text-sm font-medium text-ink">
             {title || "Untitled"}
           </span>
           {subtitle && (
-            <span className="hidden truncate font-mono text-xs text-zinc-500 sm:block">
+            <span className="hidden truncate font-mono text-xs text-muted sm:block">
               {subtitle}
             </span>
           )}
@@ -236,7 +237,7 @@ function EntryCard({
               type="button"
               onClick={onMoveUp}
               aria-label="Move up"
-              className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
+              className="rounded p-1.5 text-muted hover:bg-ink/5 hover:text-ink"
             >
               <FiChevronUp className="h-4 w-4" />
             </button>
@@ -246,7 +247,7 @@ function EntryCard({
               type="button"
               onClick={onMoveDown}
               aria-label="Move down"
-              className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
+              className="rounded p-1.5 text-muted hover:bg-ink/5 hover:text-ink"
             >
               <FiChevronDown className="h-4 w-4" />
             </button>
@@ -255,16 +256,14 @@ function EntryCard({
             type="button"
             onClick={onRemove}
             aria-label="Remove"
-            className="rounded p-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+            className="rounded p-1.5 text-muted hover:bg-danger/10 hover:text-danger"
           >
             <FiTrash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
       {open && (
-        <div className="space-y-4 border-t border-zinc-800/60 p-4">
-          {children}
-        </div>
+        <div className="space-y-4 border-t border-rule p-4">{children}</div>
       )}
     </div>
   );
@@ -275,7 +274,7 @@ function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-400 transition-colors hover:border-teal-400/50 hover:text-teal-300"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-rule px-4 py-3 text-sm text-muted transition-colors hover:border-accent/50 hover:text-accent"
     >
       <FiPlus className="h-4 w-4" />
       {label}
@@ -438,8 +437,8 @@ function ProjectsEditor({
                     onClick={() => patch(i, { imageFit: fit })}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                       active
-                        ? "border-teal-400/50 bg-teal-400/10 text-teal-300"
-                        : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-rule text-muted hover:border-ink"
                     }`}
                   >
                     {fit === "cover" ? "Fill (photos)" : "Fit (logos)"}
@@ -541,7 +540,7 @@ export default function AdminPage() {
 
   if (content === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0c] font-mono text-sm text-zinc-500">
+      <div className="flex min-h-screen items-center justify-center bg-paper font-mono text-sm text-muted">
         Loading…
       </div>
     );
@@ -575,36 +574,38 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-zinc-300">
+    <div className="min-h-screen bg-paper text-ink">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0a0a0c]/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <a href="/" className="font-mono text-sm text-zinc-100">
-              calvin<span className="text-teal-300">.hendra</span>
-              <span className="ml-2 text-zinc-500">/ admin</span>
+            <a href="/" className="font-mono text-sm text-ink">
+              <span className="font-serif text-xl">Calvin Hendra</span>
+              <span className="font-serif text-xl text-accent">.</span>
+              <span className="ml-2 text-muted">/ admin</span>
             </a>
           </div>
           <div className="flex items-center gap-3">
             {message && (
               <span
                 className={`font-mono text-xs ${
-                  message.type === "ok" ? "text-teal-300" : "text-red-400"
+                  message.type === "ok" ? "text-ink" : "text-danger"
                 }`}
               >
                 {message.text}
               </span>
             )}
             {dirty && !message && (
-              <span className="font-mono text-xs text-amber-400">
+              <span className="font-mono text-xs text-accent">
                 unsaved changes
               </span>
             )}
+            <ThemeToggle />
             <button
               type="button"
               onClick={save}
               disabled={saving || !dirty}
-              className="rounded-lg bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-ink px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
               {saving ? "Saving…" : "Save"}
             </button>
@@ -619,9 +620,7 @@ export default function AdminPage() {
                 type="button"
                 onClick={() => setTab(t)}
                 className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                  tab === t
-                    ? "bg-zinc-800 text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-300"
+                  tab === t ? "bg-ink text-paper" : "text-muted hover:text-ink"
                 }`}
               >
                 {t}

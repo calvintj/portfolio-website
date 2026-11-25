@@ -2,64 +2,119 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
+const ease = [0.2, 0.7, 0.2, 1] as const;
+
 export const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" as const },
+    transition: { duration: 0.7, ease },
   },
 };
 
-export function Section({ id, children }: { id: string; children: ReactNode }) {
+export const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Full-width hairline that draws in from the left. */
+export function Rule({ className = "" }: { className?: string }) {
   return (
-    <section
-      id={id}
-      className="scroll-mt-24 border-t border-white/5 py-20 lg:py-24"
-    >
-      {children}
-    </section>
+    <motion.div
+      aria-hidden
+      initial={{ scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1.1, ease }}
+      className={`h-px origin-left bg-rule ${className}`}
+    />
   );
 }
 
-export function SectionHeading({
-  label,
-  title,
+export function Container({
+  children,
+  className = "",
 }: {
-  label: string;
-  title: string;
+  children: ReactNode;
+  className?: string;
 }) {
   return (
-    <motion.div
+    <div
+      className={`mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Editorial section: numbered header row on a hairline, then a big serif
+ * title. With `aside`, the title sits in a sticky left column on desktop.
+ */
+export function Section({
+  id,
+  index,
+  label,
+  title,
+  count,
+  aside = false,
+  children,
+}: {
+  id: string;
+  index: number;
+  label: string;
+  title: ReactNode;
+  count?: number;
+  aside?: boolean;
+  children: ReactNode;
+}) {
+  const heading = (
+    <motion.h2
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
-      className="mb-12"
+      className="font-serif text-5xl leading-[0.95] tracking-tight text-ink sm:text-6xl lg:text-7xl"
     >
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.25em] text-teal-300">
-        {label}
-      </p>
-      <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 lg:text-4xl">
-        {title}
-      </h2>
-    </motion.div>
+      {title}
+    </motion.h2>
+  );
+
+  return (
+    <section id={id} className="scroll-mt-20 pt-20 pb-8 lg:pt-28">
+      <Container>
+        <Rule />
+        <div className="flex items-baseline justify-between pt-4 font-mono text-xs uppercase tracking-[0.2em] text-muted">
+          <span>
+            <span className="text-accent">({pad(index)})</span> {label}
+          </span>
+          {count !== undefined && <span>{pad(count)} entries</span>}
+        </div>
+        {aside ? (
+          <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-4">
+              <div className="lg:sticky lg:top-28">{heading}</div>
+            </div>
+            <div className="lg:col-span-8">{children}</div>
+          </div>
+        ) : (
+          <>
+            <div className="mt-10">{heading}</div>
+            <div className="mt-12">{children}</div>
+          </>
+        )}
+      </Container>
+    </section>
   );
 }
 
-export function TagList({ tags }: { tags: string[] }) {
+/** Tags as a quiet, wrapping mono line. */
+export function TagLine({ tags }: { tags: string[] }) {
   if (!tags.length) return null;
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs leading-relaxed text-muted">
       {tags.map((tag) => (
-        <span
-          key={tag}
-          className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 font-mono text-xs text-zinc-400"
-        >
-          {tag}
-        </span>
+        <li key={tag}>{tag}</li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -73,30 +128,37 @@ export type TimelineEntry = {
 
 export function Timeline({ entries }: { entries: TimelineEntry[] }) {
   return (
-    <div className="space-y-12">
+    <ol className="border-t border-rule">
       {entries.map((entry) => (
-        <motion.article
-          key={`${entry.year}-${entry.role}`}
+        <motion.li
+          key={`${entry.year}-${entry.role}-${entry.company}`}
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
-          className="group grid gap-2 lg:grid-cols-[180px_1fr] lg:gap-8"
+          className="grid gap-3 border-b border-rule py-8 sm:grid-cols-[9rem_1fr] sm:gap-6"
         >
-          <p className="pt-1 font-mono text-sm text-zinc-500">{entry.year}</p>
+          <p className="pt-2 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+            {entry.year}
+          </p>
           <div>
-            <h3 className="text-lg font-medium text-zinc-100">
+            <h3 className="font-serif text-3xl leading-tight text-ink">
               {entry.role}
-              <span className="text-zinc-500"> · </span>
-              <span className="text-teal-300/90">{entry.company}</span>
             </h3>
-            <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-zinc-400">
-              {entry.description}
-            </p>
-            <TagList tags={entry.technologies} />
+            <p className="mt-1 text-sm text-accent">{entry.company}</p>
+            {entry.description && (
+              <p className="mt-4 max-w-prose whitespace-pre-line text-[15px] leading-relaxed text-muted">
+                {entry.description}
+              </p>
+            )}
+            {entry.technologies.length > 0 && (
+              <div className="mt-4">
+                <TagLine tags={entry.technologies} />
+              </div>
+            )}
           </div>
-        </motion.article>
+        </motion.li>
       ))}
-    </div>
+    </ol>
   );
 }

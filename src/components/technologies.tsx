@@ -1,9 +1,7 @@
 "use client";
-import { motion } from "framer-motion";
 import type { IconType } from "react-icons";
 import { RiNextjsFill } from "react-icons/ri";
 import { SiExpress, SiFastapi, SiMysql, SiTailwindcss } from "react-icons/si";
-import { Section, SectionHeading } from "@/components/section";
 
 type Tech = { name: string } & (
   | { src: string; Icon?: never }
@@ -26,30 +24,45 @@ const technologies: Tech[] = [
   { name: "AWS", src: "/aws.svg" },
 ];
 
+function Row({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <ul
+      aria-hidden={hidden || undefined}
+      className="flex shrink-0 items-center"
+    >
+      {technologies.map((tech) => (
+        <li key={tech.name} className="flex items-center gap-4 px-6 sm:px-8">
+          {tech.Icon ? (
+            <tech.Icon className="h-7 w-7 text-ink" />
+          ) : (
+            <img src={tech.src} alt="" className="h-7 w-7 object-contain" />
+          )}
+          <span className="whitespace-nowrap font-serif text-4xl text-ink sm:text-5xl">
+            {tech.name}
+          </span>
+          <span aria-hidden className="pl-6 text-2xl text-accent sm:pl-8">
+            ✳
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Full-bleed ticker of the stack; the second copy makes the loop seamless. */
 const Technologies = () => {
   return (
-    <Section id="technologies">
-      <SectionHeading label="Stack" title="Technologies" />
-      <div className="flex flex-wrap gap-3">
-        {technologies.map((tech, index) => (
-          <motion.div
-            key={tech.name}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.4, delay: index * 0.04, ease: "easeOut" }}
-            className="flex items-center gap-2.5 rounded-lg border border-zinc-800 bg-zinc-900/40 px-4 py-2.5 transition-colors hover:border-zinc-600"
-          >
-            {tech.Icon ? (
-              <tech.Icon className="h-5 w-5 text-zinc-300" />
-            ) : (
-              <img src={tech.src} alt="" className="h-5 w-5 object-contain" />
-            )}
-            <span className="text-sm text-zinc-300">{tech.name}</span>
-          </motion.div>
-        ))}
+    <section
+      id="technologies"
+      aria-label="Technologies"
+      className="marquee-wrap mt-12 overflow-hidden border-y border-rule py-6"
+    >
+      <h2 className="sr-only">Technologies</h2>
+      <div className="marquee flex w-max">
+        <Row />
+        <Row hidden />
       </div>
-    </Section>
+    </section>
   );
 };
 

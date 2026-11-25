@@ -1,12 +1,22 @@
 "use client";
-import { Section, SectionHeading, Timeline } from "@/components/section";
+import { Section, Timeline } from "@/components/section";
 import { useContent } from "@/hooks";
 
-const Experience = () => {
+const Experience = ({ index }: { index: number }) => {
   const { content } = useContent();
   return (
-    <Section id="experience">
-      <SectionHeading label="Career" title="Experience" />
+    <Section
+      id="experience"
+      index={index}
+      label="Career"
+      title={
+        <>
+          Where I&apos;ve <em className="italic">worked</em>
+        </>
+      }
+      count={content.experiences.length}
+      aside
+    >
       <Timeline entries={content.experiences} />
     </Section>
   );
